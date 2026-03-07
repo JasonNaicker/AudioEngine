@@ -7,13 +7,10 @@
 
 class CircularBuffer {
     public:
-        CircularBuffer(std::size_t capacity) : capacity(capacity), readPointer(0), writePointer(0) {
-            buffer = new int16_t[capacity]; 
-        }
-
-        ~CircularBuffer() {
-            delete[] buffer;
-        }
+        CircularBuffer(std::size_t capacity) : capacity(capacity), readPointer(0), writePointer(0), buffer(std::make_unique<int16_t[]>(capacity)) {
+            if ((capacity & (capacity - 1)) != 0) throw std::invalid_argument("Capacity must be a power of 2");
+            if (capacity <= SAMPLE_SIZE) throw std::invalid_argument("Capacity must be larger than sample size");
+        }   
 
         inline bool read(int16_t* batch) noexcept {
             size_t read = readPointer.load(std::memory_order_relaxed);
@@ -26,10 +23,10 @@ class CircularBuffer {
             size_t spaceToEnd = capacity - read;
 
             if (SAMPLE_SIZE <= spaceToEnd) {
-                memcpy(batch, buffer + read, SAMPLE_SIZE * sizeof(int16_t));
+                memcpy(batch, buffer.get() + read, SAMPLE_SIZE * sizeof(int16_t));
             } else {
-                memcpy(batch, buffer + read, spaceToEnd * sizeof(int16_t));
-                memcpy(batch + spaceToEnd, buffer, (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
+                memcpy(batch, buffer.get() + read, spaceToEnd * sizeof(int16_t));
+                memcpy(batch + spaceToEnd, buffer.get(), (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
             }
 
             size_t nextRead = (read + SAMPLE_SIZE) & (capacity - 1);
@@ -44,10 +41,10 @@ class CircularBuffer {
             size_t spaceToEnd = capacity - write;
 
             if (SAMPLE_SIZE <= spaceToEnd) {
-                std::memcpy(buffer + write, batch, SAMPLE_SIZE * sizeof(int16_t));
+                std::memcpy(buffer.get() + write, batch, SAMPLE_SIZE * sizeof(int16_t));
             } else {
-                std::memcpy(buffer + write, batch, spaceToEnd * sizeof(int16_t));
-                std::memcpy(buffer, batch + spaceToEnd, (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
+                std::memcpy(buffer.get() + write, batch, spaceToEnd * sizeof(int16_t));
+                std::memcpy(buffer.get(), batch + spaceToEnd, (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
             }
 
             size_t nextWrite = (write + SAMPLE_SIZE) & (capacity - 1);
@@ -59,7 +56,7 @@ class CircularBuffer {
         alignas(64) std::atomic<size_t> readPointer;
         alignas(64) std::atomic<size_t> writePointer;
         std::size_t capacity;
-        int16_t* buffer;
+        std::unique_ptr<int16_t[]> buffer;
     
     public:
         static constexpr size_t CHANNELS = 2;
