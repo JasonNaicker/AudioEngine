@@ -1,5 +1,5 @@
 #include <iostream>
-#include <SDL3/SDL.h>
+//#include <SDL3/SDL.h>
 
 #include "CircularBuffer.h"
 
@@ -11,3 +11,7 @@ private:
     static const int BUFFER_SIZE = 8192;
     CircularBuffer& buffer;
 };
+
+int main() {
+
+}

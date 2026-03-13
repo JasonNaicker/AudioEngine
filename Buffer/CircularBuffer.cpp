@@ -3,7 +3,7 @@
 #include <atomic>
 #include <cstring>
 
-    CircularBuffer::CircularBuffer(std::size_t capacity) : capacity(capacity), readPointer(0), writePointer(0), buffer(std::make_unique<int16_t[]>(capacity)) {
+    CircularBuffer::CircularBuffer(std::size_t capacity) : capacity(capacity), readPointer(0), writePointer(0), buffer(std::make_unique<int16_t[]>(capacity)), mask(capacity - 1) {
         if ((capacity & (capacity - 1)) != 0) throw std::invalid_argument("Capacity must be a power of 2");
         if (capacity <= SAMPLE_SIZE) throw std::invalid_argument("Capacity must be larger than sample size");
     }   
@@ -12,38 +12,34 @@
         size_t read = readPointer.load(std::memory_order_relaxed);
         size_t write = writePointer.load(std::memory_order_acquire);
 
-        size_t available = (capacity + (write - read)) & (capacity - 1);
+        size_t available = write - read; //Capped by write
 
         if (available < SAMPLE_SIZE) return false; //Check for underun
 
-        size_t spaceToEnd = capacity - read;
+        size_t index = read & mask; //Index in buffer
+        size_t spaceToEnd = capacity - index; //Space to the end
 
-        if (SAMPLE_SIZE <= spaceToEnd) {
-            memcpy(batch, buffer.get() + read, SAMPLE_SIZE * sizeof(int16_t));
-        } else {
-            memcpy(batch, buffer.get() + read, spaceToEnd * sizeof(int16_t));
-            memcpy(batch + spaceToEnd, buffer.get(), (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
-        }
+        size_t firstPart = std::min(SAMPLE_SIZE, spaceToEnd);
+        memcpy(batch, buffer.get() + index, firstPart * sizeof(int16_t));
+        memcpy(batch + firstPart, buffer.get(), (SAMPLE_SIZE - firstPart) * sizeof(int16_t));
 
-        size_t nextRead = (read + SAMPLE_SIZE) & (capacity - 1);
+        size_t nextRead = (read + SAMPLE_SIZE);
         readPointer.store(nextRead, std::memory_order_release);
         return true;
     }
 
     bool CircularBuffer::write(const int16_t* batch) noexcept {
         size_t write = writePointer.load(std::memory_order_relaxed);
-        size_t read = readPointer.load(std::memory_order_acquire);
+        //size_t read = readPointer.load(std::memory_order_acquire);
         
-        size_t spaceToEnd = capacity - write;
+        size_t index = write & mask; //Index in buffer
+        size_t spaceToEnd = capacity - index; //Space to the end
 
-        if (SAMPLE_SIZE <= spaceToEnd) {
-            std::memcpy(buffer.get() + write, batch, SAMPLE_SIZE * sizeof(int16_t));
-        } else {
-            std::memcpy(buffer.get() + write, batch, spaceToEnd * sizeof(int16_t));
-            std::memcpy(buffer.get(), batch + spaceToEnd, (SAMPLE_SIZE - spaceToEnd) * sizeof(int16_t));
-        }
+        size_t firstPart = std::min(SAMPLE_SIZE, spaceToEnd);
+        std::memcpy(buffer.get() + index, batch, firstPart * sizeof(int16_t));
+        std::memcpy(buffer.get(), batch + firstPart, (SAMPLE_SIZE - firstPart) * sizeof(int16_t));
 
-        size_t nextWrite = (write + SAMPLE_SIZE) & (capacity - 1);
+        size_t nextWrite = (write + SAMPLE_SIZE);
         writePointer.store(nextWrite, std::memory_order_release);
         return true;
     }
