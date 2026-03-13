@@ -1,15 +1,20 @@
-#include <iostream>
+#pragma once
+
 #include <thread>
 #include <atomic>
+#include "AudioTypes.h"  
 
-class Producer {
+class Consumer {
 public:
+    Consumer(AudioBuffer& buf);
+
     void start();
     void stop();
 
 private:
+    void worker();        
+
     std::thread thread;
     std::atomic<bool> running{false};
-
-    void worker();
+    AudioBuffer& buffer;
 };

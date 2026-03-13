@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
+#include <stdexcept>
 
-template<typename SampleType>
+template<typename SampleType, size_t SAMPLE_SIZE>
 class CircularBuffer {
 public:
     CircularBuffer(std::size_t capacity);
@@ -13,9 +14,6 @@ public:
     bool read(SampleType* batch) noexcept;
     bool write(const SampleType* batch) noexcept;
 
-    static constexpr size_t CHANNELS = 2;
-    static constexpr size_t FRAME_SIZE = 1024;
-    static constexpr size_t SAMPLE_SIZE = FRAME_SIZE * CHANNELS;
     static constexpr size_t SAMPLE_BYTES = SAMPLE_SIZE * sizeof(SampleType);
 
 private:
@@ -27,8 +25,8 @@ private:
     std::unique_ptr<SampleType[]> buffer;
 };
 
-template<typename SampleType>
-CircularBuffer<SampleType>::CircularBuffer(std::size_t capacity)
+template<typename SampleType, size_t SAMPLE_SIZE>
+CircularBuffer<SampleType, SAMPLE_SIZE>::CircularBuffer(std::size_t capacity)
     : capacity(capacity), readPointer(0), writePointer(0),
       buffer(std::make_unique<SampleType[]>(capacity)), mask(capacity - 1)
 {
@@ -38,8 +36,8 @@ CircularBuffer<SampleType>::CircularBuffer(std::size_t capacity)
         throw std::invalid_argument("Capacity must be larger than sample size");
 }
 
-template<typename SampleType>
-bool CircularBuffer<SampleType>::read(SampleType* batch) noexcept {
+template<typename SampleType, size_t SAMPLE_SIZE>
+bool CircularBuffer<SampleType, SAMPLE_SIZE>::read(SampleType* batch) noexcept {
     size_t read = readPointer.load(std::memory_order_relaxed);
     size_t write = writePointer.load(std::memory_order_acquire);
 
@@ -58,8 +56,8 @@ bool CircularBuffer<SampleType>::read(SampleType* batch) noexcept {
     return true;
 }
 
-template<typename SampleType>
-bool CircularBuffer<SampleType>::write(const SampleType* batch) noexcept {
+template<typename SampleType, size_t SAMPLE_SIZE>
+bool CircularBuffer<SampleType, SAMPLE_SIZE>::write(const SampleType* batch) noexcept {
     size_t write = writePointer.load(std::memory_order_relaxed);
     // size_t read = readPointer.load(std::memory_order_acquire);
 
