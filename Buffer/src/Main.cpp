@@ -9,22 +9,22 @@
 
 int main()
 {
-    AudioStreamer audioStream;
-
     constexpr float FREQUENCY = 440.0f;
     constexpr float AMPLITUDE = 0.5f;
 
-    Sample sample[AudioConfig::FRAME_SIZE];
+    Sample sample[AudioConfig::SAMPLE_SIZE];
 
     for (size_t i = 0; i < AudioConfig::FRAME_SIZE; i++)
     {
         float t = float(i) / AudioConfig::SAMPLE_RATE;
-        float v = AMPLITUDE * std::sin(2.0 * M_PI * FREQUENCY * t);
+        float vLeft = AMPLITUDE * std::sin(2.0 * M_PI * FREQUENCY * t);
+        float vRight = AMPLITUDE * std::sin(2.0 * M_PI * FREQUENCY * t + M_PI / 2);
 
-        sample[i] = static_cast<int16_t>(v * 32767);
-
-        std::cout << v << "\n";
+        sample[i * AudioConfig::CHANNELS] = static_cast<int16_t>(vLeft * 32767);
+        sample[i * AudioConfig::CHANNELS + 1] = static_cast<int16_t>(vRight * 32767);
     }
+    AudioStreamer audioStream(std::span<const Sample>{sample});
+    audioStream.Start();
 
     return 0;
 }

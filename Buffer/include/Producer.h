@@ -3,6 +3,7 @@
 #include <thread>
 #include <atomic>
 #include "AudioTypes.h"  
+#include <span>
 
 class Producer {
 public:
@@ -16,5 +17,6 @@ private:
 
     std::thread thread;
     std::atomic<bool> running{false};
-    Producer& buffer;
+    AudioBuffer& buffer;
+    //std::span<const Sample> input;
 };

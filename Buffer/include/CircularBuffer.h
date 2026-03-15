@@ -14,8 +14,6 @@ public:
     bool read(SampleType* batch) noexcept;
     bool write(const SampleType* batch) noexcept;
 
-    static constexpr size_t SAMPLE_BYTES = SAMPLE_SIZE * sizeof(SampleType);
-
 private:
     alignas(64) std::atomic<size_t> readPointer{0};
     alignas(64) std::atomic<size_t> writePointer{0};

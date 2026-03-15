@@ -19,7 +19,7 @@ class Wav {
         const std::string SUBCHUNK2_ID = "data";
 
         template<typename T>
-        void write_as_bytes(std::ofstream &file, T value, int byte_size) {
+        void write_as_bytes(std::ofstream &file, T value, int byte_size) { //Little endian
             for(int i = 0; i < byte_size; ++i) {
                 char byte = value & 0xFF;
                 file.write(&byte, 1);
