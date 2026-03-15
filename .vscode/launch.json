@@ -4,7 +4,7 @@
             "name": "C/C++: g++.exe build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "program": "${workspaceFolder}\\build\\AudioStreamer.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "C:/msys64/mingw64/bin",

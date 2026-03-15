@@ -50,6 +50,7 @@ class Wav {
         }
 };
 
+/*
 int main() {
     
     Wav wav;
@@ -58,4 +59,4 @@ int main() {
     wav.write_header(file, data_size);
     file.close();
     return 0;
-}
+}*/

@@ -6,14 +6,14 @@
 #include "AudioStreamer.h"
 #include <iostream>
 #include <cmath>
-
+#include <vector>
 
 int main()
 {
     constexpr float FREQUENCY = 440.0f;
     constexpr float AMPLITUDE = 0.5f;
 
-    Sample sample[AudioConfig::SAMPLE_SIZE * AudioConfig::SAMPLE_RATE]; //1 second
+    std::vector<Sample> sample(AudioConfig::SAMPLE_SIZE * AudioConfig::SAMPLE_RATE); //1 second
 
     for (size_t i = 0; i < AudioConfig::FRAME_SIZE * AudioConfig::SAMPLE_RATE; i++)
     {
