@@ -1,15 +1,18 @@
 #include "AudioStreamer.h"
+#include <iostream>
+#include <mutex>
 
-AudioStreamer::AudioStreamer(std::span<const Sample> input) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input), consumer(buffer) {}
+std::mutex coutMutex;
 
-void AudioStreamer::Start()
-{
+AudioStreamer::AudioStreamer(std::span<const Sample> input)
+    : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input), consumer(buffer) {}
+
+void AudioStreamer::Start() {
     producer.start();
     consumer.start();
 }
 
-void AudioStreamer::Stop()
-{
+void AudioStreamer::Stop() {
     producer.stop();
     consumer.stop();
 }

@@ -1,7 +1,7 @@
 CXX = C:/msys64/mingw64/bin/g++.exe
 CXXFLAGS = -std=c++20 -g -fdiagnostics-color=always
-INCLUDES = -I./include
 
+INCLUDES = -I./include
 SRC_DIR = ./src
 BUILD_DIR = ./build
 TARGET = $(BUILD_DIR)/AudioStreamer.exe

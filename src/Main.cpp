@@ -7,14 +7,15 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <span>
 
 int main()
 {
     constexpr float FREQUENCY = 440.0f;
     constexpr float AMPLITUDE = 0.5f;
 
-    std::vector<Sample> sample(AudioConfig::SAMPLE_RATE * AudioConfig::CHANNELS); //1 second
 
+    Sample sample[AudioConfig::SAMPLE_RATE * AudioConfig::CHANNELS]; //1 second
     for (size_t i = 0; i < AudioConfig::SAMPLE_RATE; i++)
     {
         float t = float(i) / AudioConfig::SAMPLE_RATE;

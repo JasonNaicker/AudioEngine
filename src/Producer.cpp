@@ -2,28 +2,54 @@
 #include "AudioConfig.h"
 #include <chrono>
 #include <iostream>
+#include <mutex>
 
-Producer::Producer(AudioBuffer& buf, std::span<const Sample> input) : buffer(buf), input(input) {};
+extern std::mutex coutMutex;
+
+Producer::Producer(AudioBuffer& buf, std::span<const Sample> input) : buffer(buf), input(input) {}
 
 void Producer::worker() {
     const size_t inputSize = input.size();
     size_t sampleIndex = 0;
+
+    size_t batchesWritten = 0;
+    size_t stallCount = 0;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
     while (running) {
-        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        if(sampleIndex + AudioConfig::SAMPLE_SIZE <= inputSize) { //For testing, change for partial batches
+        if (sampleIndex + AudioConfig::SAMPLE_SIZE <= inputSize) {
             std::span<const Sample> dataToWrite = input.subspan(sampleIndex, AudioConfig::SAMPLE_SIZE);
+
+            auto writeStart = std::chrono::high_resolution_clock::now();
             bool success = buffer.write(dataToWrite.data());
 
-            if(success) {
-                std::cout << "Producer wrote a batch of " << AudioConfig::SAMPLE_SIZE << " samples\n";
+            if (success) {
+                auto writeEnd = std::chrono::high_resolution_clock::now();
+                double writeUs = std::chrono::duration<double, std::micro>(writeEnd - writeStart).count();
+                
+                batchesWritten++;
                 sampleIndex += AudioConfig::SAMPLE_SIZE;
+
+                std::lock_guard<std::mutex> lock(coutMutex);
+                std::cout << "[Producer] Batch " << batchesWritten
+                          << " written in " << writeUs << " us\n";
             } else {
-                std::cout << "Producer is waiting (buffer full)\n";
+                stallCount++;
+                std::lock_guard<std::mutex> lock(coutMutex);
+                std::cout << "[Producer] STALL #" << stallCount << " (buffer full)\n";
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-
         } else {
-            std::cout << "Producer finished processing input.\n";
+            auto endTime = std::chrono::high_resolution_clock::now();
+            double totalMs = std::chrono::duration<double, std::milli>(endTime - startTime).count();
+            double throughput = (batchesWritten * AudioConfig::SAMPLE_SIZE) / (totalMs / 1000.0);
+
+            std::lock_guard<std::mutex> lock(coutMutex);
+            std::cout << "\n[Producer] Done.\n"
+                      << "  Batches written : " << batchesWritten << "\n"
+                      << "  Total stalls    : " << stallCount << "\n"
+                      << "  Total time      : " << totalMs << " ms\n"
+                      << "  Throughput      : " << throughput << " samples/sec\n";
             running = false;
         }
     }
