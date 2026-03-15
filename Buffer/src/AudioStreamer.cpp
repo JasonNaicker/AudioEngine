@@ -1,6 +1,6 @@
 #include "AudioStreamer.h"
 
-AudioStreamer::AudioStreamer(std::span<const Sample> input) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer),consumer(buffer) {}
+AudioStreamer::AudioStreamer(std::span<const Sample> input) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input), consumer(buffer) {}
 
 void AudioStreamer::Start()
 {
