@@ -18,6 +18,6 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	del /Q $(BUILD_DIR)\*.o $(BUILD_DIR)\*.exe
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.exe
 
 .PHONY: all clean

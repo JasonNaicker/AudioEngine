@@ -13,9 +13,9 @@ int main()
     constexpr float FREQUENCY = 440.0f;
     constexpr float AMPLITUDE = 0.5f;
 
-    std::vector<Sample> sample(AudioConfig::SAMPLE_SIZE * AudioConfig::SAMPLE_RATE); //1 second
+    std::vector<Sample> sample(AudioConfig::SAMPLE_RATE * AudioConfig::CHANNELS); //1 second
 
-    for (size_t i = 0; i < AudioConfig::FRAME_SIZE * AudioConfig::SAMPLE_RATE; i++)
+    for (size_t i = 0; i < AudioConfig::SAMPLE_RATE; i++)
     {
         float t = float(i) / AudioConfig::SAMPLE_RATE;
         float vLeft = AMPLITUDE * std::sin(2.0 * M_PI * FREQUENCY * t);

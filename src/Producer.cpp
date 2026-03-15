@@ -24,7 +24,7 @@ void Producer::worker() {
 
         } else {
             std::cout << "Producer finished processing input.\n";
-            Producer::stop();
+            running = false;
         }
     }
 }
