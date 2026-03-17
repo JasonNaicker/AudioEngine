@@ -7,16 +7,16 @@
 
 class Consumer {
 public:
-    Consumer(AudioBuffer& buf);
+    Consumer(AudioBuffer& buf, std::atomic<bool>& producerEnded);
 
     void start();
     void stop();
 
 private:
-    void worker();        
+    void worker();  
 
-    std::thread thread;
-    std::atomic<bool> running{false};
+    std::atomic<bool>& producerEnded;
     AudioBuffer& buffer;
-    //std::span<const Sample> input;
+    std::atomic<bool> running{false};
+    std::thread thread;
 };

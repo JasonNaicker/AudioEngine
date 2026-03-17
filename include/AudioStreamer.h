@@ -5,6 +5,7 @@
 #include "Producer.h"
 #include "AudioConfig.h"
 #include <span>
+#include <atomic>
 
 class AudioStreamer {
 public:
@@ -13,8 +14,9 @@ public:
     void Stop();
 
 private:
+    std::atomic<bool> producerEnded{false};
     AudioBuffer buffer;
-    Consumer consumer;
     Producer producer;
+    Consumer consumer;
     //std::span<const Sample> input;
 };

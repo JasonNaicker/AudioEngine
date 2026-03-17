@@ -1,3 +1,5 @@
+#include <AudioConfig.h>
+#include <AudioTypes.h>
 #include <iostream>
 #include <fstream>
 #include <cstdint>
@@ -8,22 +10,23 @@ class Wav {
         const std::string FORMAT = "WAVE";
 
         const std::string SUBCHUNK1_ID = "fmt ";
+        const std::string SUBCHUNK2_ID = "data";
+
         const int SUBCHUNK1_SIZE = 16;
         const int AUDIO_FORMAT = 1; //Compression amount, 1 = None
-        const int NUM_CHANNELS = 2; //Stereo
-        const int SAMPLE_RATE = 44100;
-        const int BITS_PER_SAMPLE = 16;
+        const int NUM_CHANNELS = AudioConfig::CHANNELS; 
+        const int SAMPLE_RATE = AudioConfig::SAMPLE_RATE;
+        const int BITS_PER_SAMPLE = sizeof(Sample) * 8;
         const int BYTE_RATE = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
         const int BLOCK_ALIGN = NUM_CHANNELS * BITS_PER_SAMPLE / 8;
 
-        const std::string SUBCHUNK2_ID = "data";
 
         template<typename T>
         void write_as_bytes(std::ofstream &file, T value, int byte_size) { //Little endian
             for(int i = 0; i < byte_size; ++i) {
-                char byte = value & 0xFF;
-                file.write(&byte, 1);
-                value >>= 8;
+                char byte = value & 0xFF; //Write in chunks of last 2 hex digits
+                file.write(&byte, 1); //Write 1 byte of 2 digits
+                value >>= 8; //Remove last 2 hex digits
             }
         }
 
