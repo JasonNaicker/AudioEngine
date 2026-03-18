@@ -1,9 +1,14 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "AudioStreamer.h"
 #include <iostream>
+#include <fstream>
 #include <stdexcept>
 
-AudioStreamer::AudioStreamer(std::span<const Sample> input) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input, producerEnded) {//, consumer(buffer, producerEnded) {
+AudioStreamer::AudioStreamer(std::span<const Sample> input, const std::string& outputPath) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input, producerEnded), consumer(buffer, producerEnded, outputFile, wav) {
+    if(!outputPath.empty()) {
+        outputFile.open(outputPath, std::ios::binary);
+        wav.write_header(outputFile);
+    }
     ma_device_config config = ma_device_config_init(ma_device_type_playback);
     config.playback.format = ma_format_s16;
     config.playback.channels = AudioConfig::CHANNELS;
@@ -19,15 +24,15 @@ AudioStreamer::AudioStreamer(std::span<const Sample> input) : buffer(AudioConfig
 
 void AudioStreamer::Start() {
     producer.start();
-    //consumer.start();
-    ma_device_start(&device);
+    consumer.start();
+    //ma_device_start(&device);
 }
 
 void AudioStreamer::Stop() {
     producer.stop();
-    //consumer.stop();
-    ma_device_stop(&device);
-    ma_device_uninit(&device);
+    consumer.stop();
+    //ma_device_stop(&device);
+    //ma_device_uninit(&device);
 }
 
 void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {

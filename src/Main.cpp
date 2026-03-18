@@ -21,10 +21,10 @@ int main()
     if (remainder != 0) {
         inputBuffer.resize(inputBuffer.size() + (AudioConfig::SAMPLE_SIZE - remainder), 0);
     }
-
-    AudioStreamer audioStream(std::span<const Sample>{inputBuffer});
+ 
+    AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, "C:/Code/CppPrograms/AudioStreamer/build/output.wav");
     audioStream.Start();
-    std::this_thread::sleep_for(std::chrono::seconds(240)); // 4 minutes
+    std::this_thread::sleep_for(std::chrono::seconds(300)); // 5 minutes
     audioStream.Stop();
 
     return 0;

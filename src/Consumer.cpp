@@ -1,21 +1,28 @@
 #include "Consumer.h"
+#include "Wav.h"
 #include <chrono>
 #include <atomic>
+#include <fstream>
 #include <iostream>
 
-Consumer::Consumer(AudioBuffer& buf, std::atomic<bool>& producerEnded) : producerEnded(producerEnded), buffer(buf) {}
+Consumer::Consumer(AudioBuffer& buf, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav) : producerEnded(producerEnded), buffer(buf), outputFile(outputFile), wav(wav) {}
 
 void Consumer::worker() {
     Sample data[AudioConfig::SAMPLE_SIZE];
     std::span<Sample> dataToRead(data, AudioConfig::SAMPLE_SIZE);
+    size_t samplesWritten = 0;
 
     while (running) {
         bool success = buffer.read(dataToRead.data());
         if (success) {
+            wav.write_data(outputFile, dataToRead.data());
+            samplesWritten += AudioConfig::SAMPLE_SIZE;
             continue;
         } else {
             if(producerEnded) {
-                std::cout << "Consumer finished." << "\n";
+                int dataSize = samplesWritten * sizeof(Sample);
+                wav.write_size(outputFile, dataSize);
+                std::cout << "File saved..." << "\n";
                 running = false;
                 break;
             }
