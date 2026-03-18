@@ -21,7 +21,8 @@ private:
     std::ofstream outputFile;
     Wav wav;
     std::atomic<bool> producerEnded{false};
-    AudioBuffer buffer;
+    AudioBuffer audioBuffer;
+    AudioBuffer wavBuffer;
     Producer producer;
     Consumer consumer;
     ma_device device;

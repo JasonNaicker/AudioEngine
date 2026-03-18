@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-Consumer::Consumer(AudioBuffer& buf, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav) : producerEnded(producerEnded), buffer(buf), outputFile(outputFile), wav(wav) {}
+Consumer::Consumer(AudioBuffer& wavBuffer, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav) : producerEnded(producerEnded), outputFile(outputFile), wav(wav), wavBuffer(wavBuffer) {}
 
 void Consumer::worker() {
     Sample data[AudioConfig::SAMPLE_SIZE];
@@ -13,7 +13,7 @@ void Consumer::worker() {
     size_t samplesWritten = 0;
 
     while (running) {
-        bool success = buffer.read(dataToRead.data());
+        bool success = wavBuffer.read(dataToRead.data());
         if (success) {
             wav.write_data(outputFile, dataToRead.data());
             samplesWritten += AudioConfig::SAMPLE_SIZE;

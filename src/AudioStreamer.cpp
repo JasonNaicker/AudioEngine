@@ -1,10 +1,11 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "AudioStreamer.h"
+#include "Wav.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
 
-AudioStreamer::AudioStreamer(std::span<const Sample> input, const std::string& outputPath) : buffer(AudioConfig::BUFFER_SIZE), producer(buffer, input, producerEnded), consumer(buffer, producerEnded, outputFile, wav) {
+AudioStreamer::AudioStreamer(std::span<const Sample> input, const std::string& outputPath) : audioBuffer(AudioConfig::BUFFER_SIZE), wavBuffer(AudioConfig::BUFFER_SIZE), producer(audioBuffer, wavBuffer, input, producerEnded), consumer(wavBuffer, producerEnded, outputFile, wav) {
     if(!outputPath.empty()) {
         outputFile.open(outputPath, std::ios::binary);
         wav.write_header(outputFile);
@@ -23,19 +24,31 @@ AudioStreamer::AudioStreamer(std::span<const Sample> input, const std::string& o
 }
 
 void AudioStreamer::Start() {
+    std::cout << "Starting producer\n";
     producer.start();
-    consumer.start();
-    //ma_device_start(&device);
+    
+    std::cout << "File open: " << outputFile.is_open() << "\n";
+    if(outputFile.is_open()) {
+        std::cout << "Starting consumer\n";
+        consumer.start();
+    }
+    
+    std::cout << "Starting device\n";
+    ma_device_start(&device);
+    std::cout << "All started\n";
 }
 
 void AudioStreamer::Stop() {
     producer.stop();
-    consumer.stop();
-    //ma_device_stop(&device);
-    //ma_device_uninit(&device);
+    if(outputFile.is_open()) consumer.stop();
+    ma_device_stop(&device);
+    ma_device_uninit(&device);
 }
 
 void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     AudioStreamer* streamer = (AudioStreamer*) pDevice->pUserData;
-    bool success = streamer->buffer.read((Sample*) pOutput);
+    bool success = streamer->audioBuffer.read((Sample*) pOutput);
+    if(success && streamer->outputFile.is_open()) {
+        streamer->wav.write_data(streamer->outputFile, (Sample*) pOutput);
+    }
 }

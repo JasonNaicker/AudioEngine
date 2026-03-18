@@ -7,17 +7,17 @@
 #include <span>
 class Consumer {
 public:
-    Consumer(AudioBuffer& buf, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav);
+    Consumer(AudioBuffer& wavBuffer, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav);
 
     void start();
     void stop();
 
 private:
-    void worker();  
+    void worker(); 
+    std::atomic<bool>& producerEnded; 
     std::ofstream& outputFile;
     Wav& wav;
-    std::atomic<bool>& producerEnded;
-    AudioBuffer& buffer;
+    AudioBuffer& wavBuffer;
     std::atomic<bool> running{false};
     std::thread thread;
 };
