@@ -8,13 +8,13 @@
 
 int main()
 {
-    constexpr float FREQUENCY = 440.0f;
+    constexpr float FREQUENCY = 200.0f;
     constexpr float AMPLITUDE = 0.5f;
     constexpr int DURATION = 120; //Duration in seconds
     std::vector<Sample> inputBuffer(AudioConfig::SAMPLE_RATE * AudioConfig::CHANNELS * DURATION); //1 second
     float phaseStep = 2.0f * std::numbers::pi_v<float> * FREQUENCY / AudioConfig::SAMPLE_RATE;
     //Create input
-    for (size_t i = 0; i < AudioConfig::SAMPLE_RATE; i++)
+    for (size_t i = 0; i < AudioConfig::SAMPLE_RATE * DURATION; i++)
     {
         float phase = phaseStep * i;
         float vLeft = AMPLITUDE * std::sin(phase);
@@ -29,10 +29,12 @@ int main()
     if(remainder != 0) {
         inputBuffer.resize(inputBuffer.size() + (AudioConfig::SAMPLE_SIZE - remainder), 0);
     }
+
+    
     AudioStreamer audioStream(std::span<const Sample>{inputBuffer});
     audioStream.Start();
 
-    std::this_thread::sleep_for(std::chrono::seconds(15));
+    std::this_thread::sleep_for(std::chrono::seconds(8));
 
     audioStream.Stop();
 
