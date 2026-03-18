@@ -19,7 +19,11 @@ void Producer::worker() {
         }
         std::span<const Sample> dataToWrite = input.subspan(sampleIndex, AudioConfig::SAMPLE_SIZE);
         bool success = buffer.write(dataToWrite.data());
-        sampleIndex += AudioConfig::SAMPLE_SIZE;
+        if(success) {
+            sampleIndex += AudioConfig::SAMPLE_SIZE;
+        } else {
+            std::this_thread::yield();
+        }
     }
 }
 

@@ -32,5 +32,5 @@ void AudioStreamer::Stop() {
 
 void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     AudioStreamer* streamer = (AudioStreamer*) pDevice->pUserData;
-    streamer->buffer.read((Sample*) pOutput);
+    bool success = streamer->buffer.read((Sample*) pOutput);
 }

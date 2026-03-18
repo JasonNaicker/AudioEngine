@@ -57,7 +57,10 @@ bool CircularBuffer<SampleType, SAMPLE_SIZE>::read(SampleType* batch) noexcept {
 template<typename SampleType, size_t SAMPLE_SIZE>
 bool CircularBuffer<SampleType, SAMPLE_SIZE>::write(const SampleType* batch) noexcept {
     size_t write = writePointer.load(std::memory_order_relaxed);
-    // size_t read = readPointer.load(std::memory_order_acquire);
+    size_t read = readPointer.load(std::memory_order_acquire);
+
+    size_t available = write - read;
+    if (SAMPLE_SIZE + available > capacity) return false; // Check for overrun
 
     size_t index = write & mask; // Index in buffer
     size_t spaceToEnd = capacity - index; // Space to the end

@@ -5,37 +5,26 @@
 #include <cmath>
 #include <numbers>
 #include <vector>
+#include <fstream>
+#include <filesystem>
 
 int main()
 {
-    constexpr float FREQUENCY = 200.0f;
-    constexpr float AMPLITUDE = 0.5f;
-    constexpr int DURATION = 120; //Duration in seconds
-    std::vector<Sample> inputBuffer(AudioConfig::SAMPLE_RATE * AudioConfig::CHANNELS * DURATION); //1 second
-    float phaseStep = 2.0f * std::numbers::pi_v<float> * FREQUENCY / AudioConfig::SAMPLE_RATE;
-    //Create input
-    for (size_t i = 0; i < AudioConfig::SAMPLE_RATE * DURATION; i++)
-    {
-        float phase = phaseStep * i;
-        float vLeft = AMPLITUDE * std::sin(phase);
-        float vRight = AMPLITUDE * std::sin(phase + std::numbers::pi_v<float> / 2);
+    std::ifstream file("C:/Code/CppPrograms/AudioStreamer/build/billie_jean.pcm", std::ios::binary);
+    size_t fileSize = std::filesystem::file_size("C:/Code/CppPrograms/AudioStreamer/build/billie_jean.pcm");
+    std::vector<Sample> inputBuffer(fileSize / sizeof(Sample));
+    file.read((char*)inputBuffer.data(), fileSize);
+    file.close();
 
-        inputBuffer[i * AudioConfig::CHANNELS] = static_cast<int16_t>(vLeft * 32767);
-        inputBuffer[i * AudioConfig::CHANNELS + 1] = static_cast<int16_t>(vRight * 32767);
-    }
-
-    //Pad input
+    // pad
     size_t remainder = inputBuffer.size() % AudioConfig::SAMPLE_SIZE;
-    if(remainder != 0) {
+    if (remainder != 0) {
         inputBuffer.resize(inputBuffer.size() + (AudioConfig::SAMPLE_SIZE - remainder), 0);
     }
 
-    
     AudioStreamer audioStream(std::span<const Sample>{inputBuffer});
     audioStream.Start();
-
-    std::this_thread::sleep_for(std::chrono::seconds(8));
-
+    std::this_thread::sleep_for(std::chrono::seconds(240)); // 4 minutes
     audioStream.Stop();
 
     return 0;
