@@ -1,0 +1,5 @@
+build/*.pcm
+build/*.wav
+build/*.mp3
+build/*.exe
+build/*.o
