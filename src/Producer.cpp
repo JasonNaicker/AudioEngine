@@ -4,7 +4,7 @@
 #include <atomic>
 #include <iostream>
 
-Producer::Producer(AudioBuffer& audioBuffer, AudioBuffer& wavBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded) : producerEnded(producerEnded), audioBuffer(audioBuffer), wavBuffer(wavBuffer), input(input){};
+Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded) : producerEnded(producerEnded), audioBuffer(audioBuffer), input(input){};
 
 void Producer::worker() {
     const size_t inputSize = input.size();
@@ -19,12 +19,11 @@ void Producer::worker() {
         }
         std::span<const Sample> dataToWrite = input.subspan(sampleIndex, AudioConfig::SAMPLE_SIZE);
         bool success_play = audioBuffer.write(dataToWrite.data());
-        //bool success_write = wavBuffer.write(dataToWrite.data());
 
         if(success_play) {
             sampleIndex += AudioConfig::SAMPLE_SIZE;
         } else {
-            std::this_thread::yield();
+              std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 }

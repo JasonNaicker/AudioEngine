@@ -4,6 +4,6 @@
 #include "CircularBuffer.h"
 #include "AudioConfig.h"
 
-using Sample = int16_t;
-
+using Sample = float; //Internal bit depth
+using SampleSaved = int16_t; //Wav bit depth
 using AudioBuffer = CircularBuffer<Sample, AudioConfig::SAMPLE_SIZE>;

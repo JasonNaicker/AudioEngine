@@ -1,28 +1,31 @@
 #include "Consumer.h"
 #include "Wav.h"
+#include "AudioFile.h"
 #include <chrono>
 #include <atomic>
 #include <fstream>
 #include <iostream>
 
-Consumer::Consumer(AudioBuffer& wavBuffer, std::atomic<bool>& producerEnded, std::ofstream& outputFile, Wav& wav) : producerEnded(producerEnded), outputFile(outputFile), wav(wav), wavBuffer(wavBuffer) {}
+Consumer::Consumer(AudioBuffer& wavBuffer, AudioFile& audioFile, std::atomic<bool>& playbackEnded) : playbackEnded(playbackEnded), audioFile(audioFile), wavBuffer(wavBuffer) {};
 
 void Consumer::worker() {
+    std::cout << "Consumer started\n";
     Sample data[AudioConfig::SAMPLE_SIZE];
     std::span<Sample> dataToRead(data, AudioConfig::SAMPLE_SIZE);
-    size_t samplesWritten = 0;
 
     while (running) {
         bool success = wavBuffer.read(dataToRead.data());
         if (success) {
-            wav.write_data(outputFile, dataToRead.data());
-            samplesWritten += AudioConfig::SAMPLE_SIZE;
+            audioFile.writeBatch(dataToRead.data());
             continue;
         } else {
-            if(producerEnded) {
-                int dataSize = samplesWritten * sizeof(Sample);
-                wav.write_size(outputFile, dataSize);
-                std::cout << "File saved..." << "\n";
+            if(playbackEnded) {
+                std::cout<<"END CONSUMER";
+                while (wavBuffer.read(dataToRead.data())) {
+                    audioFile.writeBatch(dataToRead.data());
+                }
+                audioFile.flush();
+                audioFile.finalWrite();
                 running = false;
                 break;
             }
@@ -37,7 +40,7 @@ void Consumer::start() {
 }
 
 void Consumer::stop() {
-    running = false;
+    //running = false;
     if (thread.joinable())
         thread.join();
 }

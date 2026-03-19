@@ -18,7 +18,7 @@ public:
     const int AUDIO_FORMAT = 1; //Compression amount, 1 = None
     const int NUM_CHANNELS = AudioConfig::CHANNELS; 
     const int SAMPLE_RATE = AudioConfig::SAMPLE_RATE;
-    const int BITS_PER_SAMPLE = sizeof(Sample) * 8;
+    const int BITS_PER_SAMPLE = sizeof(SampleSaved) * 8;
     const int BYTE_RATE = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
     const int BLOCK_ALIGN = NUM_CHANNELS * BITS_PER_SAMPLE / 8;
 
@@ -56,7 +56,12 @@ public:
     }
 
     void write_data(std::ofstream &file, const Sample* batch) {
-        file.write((const char*) batch, AudioConfig::SAMPLE_SIZE * sizeof(Sample));
+        SampleSaved converted[AudioConfig::SAMPLE_SIZE];
+        for (size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
+            float clamped = std::clamp(batch[i], -1.0f, 1.0f);
+            converted[i] = static_cast<SampleSaved>(clamped * 32767.0f);
+        }
+        file.write((const char*) converted, AudioConfig::SAMPLE_SIZE * sizeof(SampleSaved));
     }
 
     void write_size(std::ofstream &file, const size_t dataSize) {
