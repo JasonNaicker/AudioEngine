@@ -1,5 +1,6 @@
 #pragma once
 
+#include "miniaudio.h"
 #include "AudioConfig.h"
 #include "AudioTypes.h"
 #include "Wav.h"
@@ -7,6 +8,12 @@
 #include <fstream>
 #include <string>
 #include <stdexcept>
+
+struct AudioFormatInfo {
+    ma_format format;
+    ma_uint32 channels;
+    ma_uint32 sampleRate;
+};
 
 class AudioFile {
 public:
@@ -26,7 +33,8 @@ private:
     static std::vector<Sample> loadPCM(const std::string& path);
     static std::vector<Sample> loadWAV(const std::string& path);
     static std::vector<Sample> loadMP3(const std::string& path);
-
+    static AudioFormatInfo getFormat(const std::string& path);
+    static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
     std::ofstream outputFile;
     size_t samplesWritten{0}; 
     Wav wav;

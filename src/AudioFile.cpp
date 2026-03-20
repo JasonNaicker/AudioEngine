@@ -6,6 +6,46 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <miniaudio.h>
+
+AudioFormatInfo AudioFile::getFormat(const std::string& path) {
+    if(path.empty()) throw std::runtime_error("Path is empty");
+    ma_decoder decoder;
+    if(ma_decoder_init_file(path.c_str(), nullptr, &decoder) != MA_SUCCESS) throw std::runtime_error("Failed to inspect: " + path);
+
+    AudioFormatInfo info;
+    ma_decoder_get_data_format(&decoder, &info.format, &info.channels, &info.sampleRate, nullptr, 0);
+
+    ma_decoder_uninit(&decoder);
+    return info;
+}
+std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sample>& buffer) {
+    AudioFormatInfo info = getFormat(path);
+
+    ma_data_converter_config config = ma_data_converter_config_init(
+        info.format,
+        ma_format_f32, 
+        info.channels,
+        AudioConfig::CHANNELS,
+        info.sampleRate,
+        AudioConfig::SAMPLE_RATE
+    );
+
+    ma_data_converter converter;
+    if(ma_data_converter_init(&config, nullptr, &converter) != MA_SUCCESS) 
+        throw std::runtime_error("Failed to init converter for: " + path);
+
+    ma_uint64 frameCountIn = buffer.size() / info.channels;
+    ma_uint64 frameCountOut = 0;
+    ma_data_converter_get_expected_output_frame_count(&converter, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
+    
+    std::vector<Sample> output(frameCountOut * AudioConfig::CHANNELS);
+    if (ma_data_converter_process_pcm_frames(&converter, buffer.data(), &frameCountIn, output.data(), &frameCountOut)) 
+        throw std::runtime_error("Failed to convert PCM frames for: " + path);
+
+    ma_data_converter_uninit(&converter, nullptr);
+    return output;
+}
 
 std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
     if(path.empty()) throw std::runtime_error("Path is empty");
@@ -17,7 +57,6 @@ std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
     std::vector<Sample> inputBuffer(fileSize / sizeof(Sample));
     file.read((char*) inputBuffer.data(), fileSize);
     return inputBuffer;
-
 }
 
 std::vector<Sample> AudioFile::loadWAV(const std::string& path) {
@@ -36,14 +75,24 @@ std::vector<Sample> AudioFile::loadWAV(const std::string& path) {
 }
 
 std::vector<Sample> AudioFile::loadMP3(const std::string& path) {
-    throw std::runtime_error("MP3 loading not yet implemented");
+    throw std::runtime_error("MP3 is not implemented");
 }
 
 std::vector<Sample> AudioFile::load(const std::string& path) {
     std::vector<Sample> inputBuffer;
-    if(path.ends_with(".pcm")) inputBuffer = loadPCM(path);
-    else if(path.ends_with(".wav")) inputBuffer = loadWAV(path);
-    else if(path.ends_with(".mp3")) inputBuffer = loadMP3(path);
+    if(path.ends_with(".pcm")) {
+        inputBuffer = loadPCM(path);
+    }
+    else if(path.ends_with(".wav")) 
+    {
+        inputBuffer = loadWAV(path);
+        inputBuffer = reformat(path, inputBuffer);
+    }
+    else if(path.ends_with(".mp3")) 
+    {
+        inputBuffer = loadMP3(path);
+        inputBuffer = reformat(path, inputBuffer);
+    }
     else throw std::runtime_error("Unsupported format " + path);
     pad(inputBuffer);
     return inputBuffer;
@@ -82,8 +131,6 @@ bool AudioFile::is_Open() {
 void AudioFile::writeBatch(const Sample* batch) {
     if(format == Format::WAV) {
         wav.write_data(outputFile, batch);
-         std::cout << "Batch Written";
-         std::cout << "\n";
         samplesWritten += AudioConfig::SAMPLE_SIZE;
     } else if(format == Format::MP3) {
         throw std::runtime_error("MP3 saving not yet implemented");
@@ -93,7 +140,6 @@ void AudioFile::writeBatch(const Sample* batch) {
 void AudioFile::finalWrite() {
     int dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
     wav.write_size(outputFile, dataSize);
-    std::cout << "Final Write";
 }
 
 void AudioFile::close() {

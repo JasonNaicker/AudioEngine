@@ -4,6 +4,7 @@
 #include "AudioStreamer.h"
 #include <iostream>
 #include <cmath>
+#include <thread>
 #include <numbers>
 #include <vector>
 #include <fstream>
@@ -29,9 +30,9 @@ int main()
     }
  */
 
-    AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, outputPath);
+    AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, true, outputPath);
     audioStream.Start();
-    std::this_thread::sleep_for(std::chrono::seconds(5)); // 5 minutes
+    std::this_thread::sleep_for(std::chrono::seconds(300)); // 5 minutes
     audioStream.Stop();
 
     return 0;

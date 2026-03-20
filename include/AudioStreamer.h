@@ -9,10 +9,9 @@
 #include <string>
 #include <span>
 #include <atomic>
-
 class AudioStreamer {
 public:
-    AudioStreamer(std::span<const Sample> input, const std::string& outputPath = "");
+    AudioStreamer(std::span<const Sample> input, bool useMic, const std::string& outputPath = "");
     void Start();
     void Stop();
     void Pause();
@@ -25,9 +24,12 @@ private:
     std::atomic<bool> producerEnded{false};
     std::atomic<bool> playbackEnded{false};
     AudioBuffer audioBuffer;
-    AudioBuffer wavBuffer;
+    AudioBuffer saveBuffer;
+    AudioBuffer inputBuffer;
     Producer producer;
     Consumer consumer;
     ma_device device;
+    
+    bool useMic;
 
 };

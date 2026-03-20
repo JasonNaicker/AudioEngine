@@ -1,7 +1,8 @@
 CXX = C:/msys64/mingw64/bin/g++.exe
 CXXFLAGS = -std=c++20 -g -fdiagnostics-color=always
 
-INCLUDES = -I./include
+INCLUDES = -I./include -IC:/msys64/mingw64/include
+LIBS = -LC:/msys64/mingw64/lib -lmp3lame -lavcodec -lavformat -lavutil -lswresample
 SRC_DIR = ./src
 BUILD_DIR = ./build
 TARGET = $(BUILD_DIR)/AudioStreamer.exe
@@ -12,7 +13,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LIBS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@

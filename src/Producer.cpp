@@ -7,12 +7,16 @@
 Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded) : producerEnded(producerEnded), audioBuffer(audioBuffer), input(input){};
 
 void Producer::worker() {
+    if (input.empty()) {
+        running = false;
+        producerEnded = true;
+        return;
+    }
     const size_t inputSize = input.size();
     size_t sampleIndex = 0;
     while (running) {
         //Fixed input only, otherwise dynamic input never ends
         if(sampleIndex == inputSize) {
-            std::cout << "Producer finished." << "\n";
             running = false;
             producerEnded = true;
             break;

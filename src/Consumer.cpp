@@ -6,22 +6,20 @@
 #include <fstream>
 #include <iostream>
 
-Consumer::Consumer(AudioBuffer& wavBuffer, AudioFile& audioFile, std::atomic<bool>& playbackEnded) : playbackEnded(playbackEnded), audioFile(audioFile), wavBuffer(wavBuffer) {};
+Consumer::Consumer(AudioBuffer& saveBuffer, AudioFile& audioFile, std::atomic<bool>& playbackEnded) : playbackEnded(playbackEnded), audioFile(audioFile), saveBuffer(saveBuffer) {};
 
 void Consumer::worker() {
-    std::cout << "Consumer started\n";
     Sample data[AudioConfig::SAMPLE_SIZE];
     std::span<Sample> dataToRead(data, AudioConfig::SAMPLE_SIZE);
 
     while (running) {
-        bool success = wavBuffer.read(dataToRead.data());
+        bool success = saveBuffer.read(dataToRead.data());
         if (success) {
             audioFile.writeBatch(dataToRead.data());
             continue;
         } else {
             if(playbackEnded) {
-                std::cout<<"END CONSUMER";
-                while (wavBuffer.read(dataToRead.data())) {
+                while (saveBuffer.read(dataToRead.data())) {
                     audioFile.writeBatch(dataToRead.data());
                 }
                 audioFile.flush();
