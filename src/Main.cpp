@@ -12,7 +12,7 @@
 
 int main()
 {
-    std::string inputPath = "C:/Code/CppPrograms/AudioStreamer/build/billie_jean_f32.pcm";
+    std::string inputPath = "C:/Code/CppPrograms/AudioStreamer/inputAudio/pcm/billie_jean_f32.pcm";
     std::string outputPath = "C:/Code/CppPrograms/AudioStreamer/build/output.wav";
     std::vector<Sample> inputBuffer = AudioFile::load(inputPath);
     /*
@@ -30,7 +30,7 @@ int main()
     }
  */
 
-    AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, true, outputPath);
+    AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, false, outputPath);
     audioStream.Start();
     std::this_thread::sleep_for(std::chrono::seconds(300)); // 5 minutes
     audioStream.Stop();

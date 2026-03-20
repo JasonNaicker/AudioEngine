@@ -3,3 +3,4 @@ build/*.wav
 build/*.mp3
 build/*.exe
 build/*.o
+build/AudioFile.o

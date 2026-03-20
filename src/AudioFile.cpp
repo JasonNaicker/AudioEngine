@@ -2,11 +2,12 @@
 #include "AudioConfig.h"
 #include "AudioTypes.h"
 #include "Wav.h"
+#include <miniaudio.h>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <filesystem>
-#include <miniaudio.h>
+
 
 AudioFormatInfo AudioFile::getFormat(const std::string& path) {
     if(path.empty()) throw std::runtime_error("Path is empty");
