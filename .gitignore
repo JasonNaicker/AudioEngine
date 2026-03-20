@@ -3,4 +3,7 @@ build/*.wav
 build/*.mp3
 build/*.exe
 build/*.o
-build/AudioFile.o
+inputAudio/*.pcm
+inputAudio/*.wav
+inputAudio/*.mp3
+inputAudio/*.exe
