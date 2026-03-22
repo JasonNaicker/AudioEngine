@@ -18,8 +18,8 @@ AudioStreamer::AudioStreamer(std::span<const Sample> input, bool useMic, const s
     ma_device_config config = ma_device_config_init(deviceType);
     config.playback.format = ma_format_f32;
     config.playback.channels = AudioConfig::CHANNELS;
-    config.noPreSilencedOutputBuffer = MA_FALSE;
-    config.noClip = MA_FALSE;
+    //config.noPreSilencedOutputBuffer = MA_FALSE;
+    //config.noClip = MA_FALSE;
     if(useMic) {
         config.capture.format = ma_format_f32;
         config.capture.channels = AudioConfig::CHANNELS;

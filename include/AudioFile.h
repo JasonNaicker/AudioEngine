@@ -17,7 +17,7 @@ struct AudioFormatInfo {
 
 class AudioFile {
 public:
-    enum class Format {WAV, MP3, NONE};
+    enum class Format {WAV, MP3, FLAC, NONE};
 
     static std::vector<Sample> load(const std::string& path);
     static void pad(std::vector<Sample>& buffer);
@@ -33,6 +33,7 @@ private:
     static std::vector<Sample> loadPCM(const std::string& path);
     static std::vector<Sample> loadWAV(const std::string& path);
     static std::vector<Sample> loadMP3(const std::string& path);
+    static std::vector<Sample> loadFlac(const std::string* path);
     static AudioFormatInfo getFormat(const std::string& path);
     static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
     std::ofstream outputFile;

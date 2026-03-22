@@ -1,8 +1,8 @@
 CXX = C:/msys64/mingw64/bin/g++.exe
 CXXFLAGS = -std=c++20 -g -fdiagnostics-color=always
 
-INCLUDES = -I./include -IC:/msys64/mingw64/include
-LIBS = -LC:/msys64/mingw64/lib -lmp3lame -lavcodec -lavformat -lavutil -lswresample
+INCLUDES = -I./include -IC:/msys64/mingw64/include -IC:/msys64/mingw64/include/opus
+LIBS = -LC:/msys64/mingw64/lib -lmp3lame -lavcodec -lavformat -lavutil -lswresample 
 SRC_DIR = ./src
 BUILD_DIR = ./build
 TARGET = $(BUILD_DIR)/AudioStreamer.exe
