@@ -1,6 +1,8 @@
+#include "AudioFile.h"
+#include "AudioTypes.h"
+#include "AudioConfig.h"
 #include "Consumer.h"
 #include "Wav.h"
-#include "AudioFile.h"
 #include <chrono>
 #include <atomic>
 #include <fstream>
@@ -39,6 +41,5 @@ void Consumer::start() {
 
 void Consumer::stop() {
     //running = false;
-    if (thread.joinable())
-        thread.join();
+    if (thread.joinable()) thread.join();
 }

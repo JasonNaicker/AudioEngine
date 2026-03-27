@@ -1,5 +1,8 @@
-#include "Producer.h"
+#include "AudioFile.h"
+#include "AudioTypes.h"
 #include "AudioConfig.h"
+#include "Producer.h"
+#include "Wav.h"
 #include <chrono>
 #include <atomic>
 #include <iostream>
@@ -39,6 +42,5 @@ void Producer::start() {
 
 void Producer::stop() {
     running = false;
-    if (thread.joinable())
-        thread.join();
+    if (thread.joinable()) thread.join();
 }

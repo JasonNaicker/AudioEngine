@@ -4,8 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/include",
+                "${workspaceFolder}/include/configurations",
+                "${workspaceFolder}/include/libraries",
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/**",
                 "C:/msys64/mingw64/include"
             ],
             "defines": [

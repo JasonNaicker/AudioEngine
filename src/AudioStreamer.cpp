@@ -1,6 +1,8 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "AudioStreamer.h"
 #include "AudioFile.h"
+#include "AudioTypes.h"
+#include "MixConfig.h"
 #include "Wav.h"
 #include <iostream>
 #include <fstream>
