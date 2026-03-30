@@ -65,15 +65,14 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
     AudioStreamer* streamer = (AudioStreamer*) pDevice->pUserData;
 
     const Sample* mic = (const Sample*) pInput;
-    Sample playbackAudio[AudioConfig::SAMPLE_SIZE] = {}; //Regular playback
 
+    Sample playbackAudio[AudioConfig::SAMPLE_SIZE] = {}; //Regular playback
     bool audioSuccess = streamer->audioBuffer.read((Sample*) playbackAudio); //Read into intermediary buffer
 
     Sample* out = (Sample*) pOutput; //Final output buffer
-
     for(size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
-        float playback = playbackAudio[i] * 1.0f;
-        float micSample = mic ? mic[i] * 1.0f : 0.0f;
+        float playback = playbackAudio[i] * MixConfig::masterGain;
+        float micSample = mic ? mic[i] * MixConfig::micGain : 0.0f;
 
         out[i] = std::tanh(playback + micSample);
     }

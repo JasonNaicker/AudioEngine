@@ -27,15 +27,19 @@ public:
     void finalWrite();
     void close();
     void flush();
-    bool is_Open();   
+    bool is_Open();
+    
+    static std::vector<Sample> convert(
+
+    );
 
 private:
     static std::vector<Sample> loadPCM(const std::string& path);
-    static std::vector<Sample> loadWAV(const std::string& path);
-    static std::vector<Sample> loadMP3(const std::string& path);
-    static std::vector<Sample> loadFlac(const std::string* path);
+    //static std::vector<Sample> loadWAV(const std::string& path);
+    //static std::vector<Sample> loadMP3(const std::string& path);
+    //static std::vector<Sample> loadFlac(const std::string* path);
     static AudioFormatInfo getFormat(const std::string& path);
-    static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
+    //static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
     std::ofstream outputFile;
     size_t samplesWritten{0}; 
     Wav wav;

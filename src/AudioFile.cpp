@@ -8,22 +8,16 @@
 #include <vector>
 #include <filesystem>
 
-
-AudioFormatInfo AudioFile::getFormat(const std::string& path) {
-    if(path.empty()) throw std::runtime_error("Path is empty");
-    ma_decoder decoder;
-    if(ma_decoder_init_file(path.c_str(), nullptr, &decoder) != MA_SUCCESS) throw std::runtime_error("Failed to inspect: " + path);
-
-    AudioFormatInfo info;
-    ma_decoder_get_data_format(&decoder, &info.format, &info.channels, &info.sampleRate, nullptr, 0);
-
-    ma_decoder_uninit(&decoder);
-    return info;
-}
+/* @deprecated
 std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sample>& buffer) {
     AudioFormatInfo info = getFormat(path);
 
-    ma_data_converter_config config = ma_data_converter_config_init(
+    ma_decoder_config config = ma_decoder_config_init(
+        ma_format_f32,
+        AudioConfig::CHANNELS,
+        AudioConfig::SAMPLE_RATE
+    );
+        ma_data_converter_config config = ma_data_converter_config_init(
         info.format,
         ma_format_f32, 
         info.channels,
@@ -36,8 +30,8 @@ std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sam
     if(ma_data_converter_init(&config, nullptr, &converter) != MA_SUCCESS) 
         throw std::runtime_error("Failed to init converter for: " + path);
 
-    ma_uint64 frameCountIn = buffer.size() / info.channels;
-    ma_uint64 frameCountOut = 0;
+    ma_uint64 frameCountIn = buffer.size() / info.channels; //Samples / channels = frameCount
+    ma_uint64 frameCountOut = 0; //Updated frame count with new Frame rate
     ma_data_converter_get_expected_output_frame_count(&converter, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
     
     std::vector<Sample> output(frameCountOut * AudioConfig::CHANNELS);
@@ -46,18 +40,6 @@ std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sam
 
     ma_data_converter_uninit(&converter, nullptr);
     return output;
-}
-
-std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
-    if(path.empty()) throw std::runtime_error("Path is empty");
-
-    std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) throw std::runtime_error("Failed to load: " + path);
-
-    size_t fileSize = std::filesystem::file_size(path);
-    std::vector<Sample> inputBuffer(fileSize / sizeof(Sample));
-    file.read((char*) inputBuffer.data(), fileSize);
-    return inputBuffer;
 }
 
 std::vector<Sample> AudioFile::loadWAV(const std::string& path) {
@@ -97,6 +79,62 @@ std::vector<Sample> AudioFile::load(const std::string& path) {
     else throw std::runtime_error("Unsupported format " + path);
     pad(inputBuffer);
     return inputBuffer;
+} */
+
+
+
+std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
+    if(path.empty()) throw std::runtime_error("Path is empty");
+
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) throw std::runtime_error("Failed to load: " + path);
+
+    size_t fileSize = std::filesystem::file_size(path);
+    std::vector<Sample> inputBuffer(fileSize / sizeof(Sample));
+    file.read((char*) inputBuffer.data(), fileSize);
+    return inputBuffer;
+}
+
+AudioFormatInfo AudioFile::getFormat(const std::string& path) {
+    if(path.empty()) throw std::runtime_error("Path is empty");
+    ma_decoder decoder;
+    if(ma_decoder_init_file(path.c_str(), nullptr, &decoder) != MA_SUCCESS) throw std::runtime_error("Failed to inspect: " + path);
+
+    AudioFormatInfo info;
+    ma_decoder_get_data_format(&decoder, &info.format, &info.channels, &info.sampleRate, nullptr, 0);
+
+    ma_decoder_uninit(&decoder);
+    return info;
+}
+
+std::vector<Sample> AudioFile::load(const std::string& path) {
+    if (path.empty()) throw std::runtime_error("Path is empty");
+
+    std::vector<Sample> buffer;
+    if (path.ends_with(".pcm")) {
+        buffer = loadPCM(path);
+    } else {
+        ma_decoder_config config = ma_decoder_config_init(
+            ma_format_f32,
+            AudioConfig::CHANNELS,
+            AudioConfig::SAMPLE_RATE
+        );
+
+        ma_decoder decoder;
+
+        if(ma_decoder_init_file(path.c_str(), &config, &decoder) != MA_SUCCESS)
+            throw std::runtime_error("Failed to load: " + path);
+
+        ma_uint64 totalFrames;
+        ma_decoder_get_length_in_pcm_frames(&decoder, &totalFrames);
+
+        buffer.resize(totalFrames * AudioConfig::CHANNELS);
+        ma_decoder_read_pcm_frames(&decoder, buffer.data(), totalFrames, nullptr);
+        ma_decoder_uninit(&decoder);
+    }
+    
+    pad(buffer);
+    return buffer;
 }
 
 void AudioFile::pad(std::vector<Sample>& buffer) {

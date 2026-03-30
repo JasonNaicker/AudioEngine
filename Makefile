@@ -4,7 +4,7 @@ CXXFLAGS := -std=c++20 -g -O0 -Wall -Wextra -fdiagnostics-color=always -MMD -MP
 
 # ===== Includes =====
 INCLUDES := -I./include -I./include/configurations -I./include/libraries \
-            -IC:/msys64/mingw64/include -IC:/msys64/mingw64/include/opus
+	        -IC:/msys64/mingw64/include -IC:/msys64/mingw64/include/opus
 
 # ===== Libraries =====
 LIB_DIRS := -LC:/msys64/mingw64/lib
@@ -26,23 +26,23 @@ DEPS := $(OBJS:.o=.d)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-    @echo "[LD] $@"
-    @$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIB_DIRS) $(LIBS)
+	@echo "[LD] $@"
+	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIB_DIRS) $(LIBS)
 
 $(BUILD_DIR):
-    @mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-    @echo "[CC] $<"
-    @$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	@echo "[CC] $<"
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 -include $(DEPS)
 
 # ===== Utility =====
 run: all
-    @$(TARGET)
+	@$(TARGET)
 
 clean:
-    rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.exe $(BUILD_DIR)/*.d
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.exe $(BUILD_DIR)/*.d
 
 .PHONY: all clean run

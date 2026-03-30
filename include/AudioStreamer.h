@@ -23,6 +23,7 @@ private:
     std::atomic<bool> paused{false};
     std::atomic<bool> producerEnded{false};
     std::atomic<bool> playbackEnded{false};
+    //AudioBuffer networkBuffer;
     AudioBuffer audioBuffer;
     AudioBuffer saveBuffer;
     AudioBuffer inputBuffer;

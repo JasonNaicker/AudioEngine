@@ -2,11 +2,11 @@
 #include "AudioTypes.h"
 #include <opus\opus.h>
 #include <memory>
-
+#include <vector>
 class AudioEncoder {
 public:
     AudioEncoder();
-    void Encode(Sample* batch);
+    std::vector<unsigned char> Encode(Sample* batch);
 
 private:
     std::unique_ptr<OpusEncoder, decltype(&opus_encoder_destroy)> encoder;

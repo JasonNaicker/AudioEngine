@@ -3,6 +3,7 @@ build/*.wav
 build/*.mp3
 build/*.exe
 build/*.o
+build/*.d
 inputAudio/*.pcm
 inputAudio/*.wav
 inputAudio/*.mp3
