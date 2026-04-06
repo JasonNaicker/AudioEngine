@@ -1,5 +1,4 @@
 #pragma once
-
 #include "miniaudio.h"
 #include "AudioConfig.h"
 #include "AudioTypes.h"
@@ -27,11 +26,7 @@ public:
     void finalWrite();
     void close();
     void flush();
-    bool is_Open();
-    
-    static std::vector<Sample> convert(
-
-    );
+    bool isOpen();
 
 private:
     static std::vector<Sample> loadPCM(const std::string& path);

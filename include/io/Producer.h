@@ -1,8 +1,7 @@
 #pragma once
-
+#include "AudioTypes.h"  
 #include <thread>
 #include <atomic>
-#include "AudioTypes.h"  
 #include <span>
 
 class Producer {

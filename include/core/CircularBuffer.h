@@ -15,18 +15,17 @@ public:
     bool write(const SampleType* batch) noexcept;
 
 private:
+    std::size_t capacity;
+    std::size_t mask;
+    std::unique_ptr<SampleType[]> buffer;
     alignas(64) std::atomic<size_t> readPointer{0};
     alignas(64) std::atomic<size_t> writePointer{0};
-
-    std::size_t mask;
-    std::size_t capacity;
-    std::unique_ptr<SampleType[]> buffer;
 };
 
 template<typename SampleType, size_t SAMPLE_SIZE>
 CircularBuffer<SampleType, SAMPLE_SIZE>::CircularBuffer(std::size_t capacity)
-    : capacity(capacity), readPointer(0), writePointer(0),
-      buffer(std::make_unique<SampleType[]>(capacity)), mask(capacity - 1)
+: capacity(capacity), mask(capacity - 1), buffer(std::make_unique<SampleType[]>(capacity)),
+readPointer(0), writePointer(0)
 {
     if ((capacity & (capacity - 1)) != 0)
         throw std::invalid_argument("Capacity must be a power of 2");

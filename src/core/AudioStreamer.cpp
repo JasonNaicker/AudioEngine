@@ -9,12 +9,6 @@
 #include <stdexcept>
 
 AudioStreamer::AudioStreamer(const std::span<const Sample> input, bool useMic, const std::string& outputPath) : audioBuffer(AudioConfig::BUFFER_SIZE), saveBuffer(AudioConfig::BUFFER_SIZE), inputBuffer(AudioConfig::BUFFER_SIZE), producer(audioBuffer, input, producerEnded), consumer(saveBuffer, audioFile, playbackEnded), useMic(useMic){
-    /*
-    if(!outputPath.empty()) {
-        outputFile.open(outputPath, std::ios::binary);
-        wav.write_header(outputFile);
-    } */
-
     audioFile.open(outputPath);
     ma_device_type deviceType = useMic ? ma_device_type_duplex : ma_device_type_playback;
     ma_device_config config = ma_device_config_init(deviceType);
@@ -39,7 +33,7 @@ AudioStreamer::AudioStreamer(const std::span<const Sample> input, bool useMic, c
 
 void AudioStreamer::Start() {
     producer.start();
-    if(audioFile.is_Open()) {
+    if(audioFile.isOpen()) {
         consumer.start();
     }
     ma_device_start(&device);
@@ -49,7 +43,7 @@ void AudioStreamer::Stop() {
     producer.stop();
     ma_device_stop(&device);
     playbackEnded = true;
-    if(audioFile.is_Open()) consumer.stop();
+    if(audioFile.isOpen()) consumer.stop();
     ma_device_uninit(&device);
 }
 
@@ -76,14 +70,7 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
         output[i] = std::tanh(playbackSample + micSample);
     }
 
-    /*
-    streamer->inputBuffer.write((Sample*) pInput); //Write mic input to input buffer
-    bool success = streamer->audioBuffer.read((Sample*) pOutput); //Read buffer for playback
-    if(success && streamer->audioFile.is_Open()) {
-        streamer->saveBuffer.write((const Sample*) pOutput); //Write frame to saving buffer
-    } */
-
-    if(streamer->audioFile.is_Open()) {
+    if(streamer->audioFile.isOpen()) {
         streamer->saveBuffer.write(output);
     }
 }

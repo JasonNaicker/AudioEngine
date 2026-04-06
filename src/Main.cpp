@@ -15,20 +15,6 @@ int main()
     std::string inputPath = "C:/Code/CppPrograms/AudioStreamer/inputAudio/pcm/billie_jean_48k_f32.pcm";
     std::string outputPath = "C:/Code/CppPrograms/AudioStreamer/build/output.wav";
     const std::vector<Sample> inputBuffer = AudioFile::load(inputPath);
-    /*
-    if(file.is_open()) {
-        size_t fileSize = std::filesystem::file_size(inputPath);
-        inputBuffer = std::vector<Sample>(fileSize / sizeof(Sample));
-        file.read((char*) inputBuffer.data(), fileSize);
-        file.close();
-    }
-
-    // pad
-    size_t remainder = inputBuffer.size() % AudioConfig::SAMPLE_SIZE;
-    if (remainder != 0) {
-        inputBuffer.resize(inputBuffer.size() + (AudioConfig::SAMPLE_SIZE - remainder), 0);
-    }
- */
 
     AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, false, outputPath);
     audioStream.Start();

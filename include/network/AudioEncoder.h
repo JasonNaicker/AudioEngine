@@ -6,7 +6,7 @@
 class AudioEncoder {
 public:
     AudioEncoder();
-    std::vector<unsigned char> Encode(Sample* batch);
+    std::vector<unsigned char> encode(Sample* batch);
 
 private:
     std::unique_ptr<OpusEncoder, decltype(&opus_encoder_destroy)> encoder;

@@ -147,7 +147,7 @@ void AudioFile::open(const std::string& path) {
 
     if(path.ends_with(".wav")) {
         format = Format::WAV;
-        wav.write_header(outputFile);
+        wav.writeHeader(outputFile);
     }
     else if(path.ends_with(".mp3")) {
         format = Format::MP3;
@@ -158,13 +158,13 @@ void AudioFile::flush() {
     outputFile.flush();
 }
 
-bool AudioFile::is_Open() {
+bool AudioFile::isOpen() {
     return outputFile.is_open();
 }
 
 void AudioFile::writeBatch(const Sample* batch) {
     if(format == Format::WAV) {
-        wav.write_data(outputFile, batch);
+        wav.writeData(outputFile, batch);
         samplesWritten += AudioConfig::SAMPLE_SIZE;
     } else if(format == Format::MP3) {
         throw std::runtime_error("MP3 saving not yet implemented");
@@ -173,7 +173,7 @@ void AudioFile::writeBatch(const Sample* batch) {
 
 void AudioFile::finalWrite() {
     int dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
-    wav.write_size(outputFile, dataSize);
+    wav.writeSize(outputFile, dataSize);
 }
 
 void AudioFile::close() {

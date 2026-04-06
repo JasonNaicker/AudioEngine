@@ -4,10 +4,14 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/include/configurations",
+                "${workspaceFolder}/include/core",
+                "${workspaceFolder}/include/io",
+                "${workspaceFolder}/include/dsp",
+                "${workspaceFolder}/include/network",
                 "${workspaceFolder}/include/libraries",
                 "${workspaceFolder}/src",
-                "C:/msys64/mingw64/include"
+                "C:/msys64/mingw64/include",
+                "C:/msys64/mingw64/include/opus"
             ],
             "defines": [
                 "_DEBUG",
@@ -16,11 +20,16 @@
             ],
             "windowsSdkVersion": "10.0.26100.0",
             "cStandard": "c23",
-            "cppStandard": "c++26",
+            "cppStandard": "c++20",
             "intelliSenseMode": "windows-gcc-x64",
             "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
             "compilerArgs": [
-                "-I${workspaceFolder}/include"
+                "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/include/core",
+                "-I${workspaceFolder}/include/io",
+                "-I${workspaceFolder}/include/dsp",
+                "-I${workspaceFolder}/include/network",
+                "-I${workspaceFolder}/vendor"
             ]
         }
     ],
