@@ -40,6 +40,6 @@ void Consumer::start() {
 }
 
 void Consumer::stop() {
-    //running = false;
+    //running = false; (Won't save because it will not final write before execution immediately finishes)
     if (thread.joinable()) thread.join();
 }

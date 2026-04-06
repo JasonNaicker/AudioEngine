@@ -8,7 +8,7 @@
 #include <fstream>
 #include <stdexcept>
 
-AudioStreamer::AudioStreamer(std::span<const Sample> input, bool useMic, const std::string& outputPath) : audioBuffer(AudioConfig::BUFFER_SIZE), saveBuffer(AudioConfig::BUFFER_SIZE), inputBuffer(AudioConfig::BUFFER_SIZE), producer(audioBuffer, input, producerEnded), consumer(saveBuffer, audioFile, playbackEnded), useMic(useMic){
+AudioStreamer::AudioStreamer(const std::span<const Sample> input, bool useMic, const std::string& outputPath) : audioBuffer(AudioConfig::BUFFER_SIZE), saveBuffer(AudioConfig::BUFFER_SIZE), inputBuffer(AudioConfig::BUFFER_SIZE), producer(audioBuffer, input, producerEnded), consumer(saveBuffer, audioFile, playbackEnded), useMic(useMic){
     /*
     if(!outputPath.empty()) {
         outputFile.open(outputPath, std::ios::binary);
@@ -63,18 +63,17 @@ void AudioStreamer::Resume() {
 
 void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     AudioStreamer* streamer = (AudioStreamer*) pDevice->pUserData;
-
-    const Sample* mic = (const Sample*) pInput;
+    const Sample* input = (const Sample*) pInput;
+    Sample* output = (Sample*) pOutput;
 
     Sample playbackAudio[AudioConfig::SAMPLE_SIZE] = {}; //Regular playback
     bool audioSuccess = streamer->audioBuffer.read((Sample*) playbackAudio); //Read into intermediary buffer
 
-    Sample* out = (Sample*) pOutput; //Final output buffer
     for(size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
-        float playback = playbackAudio[i] * MixConfig::masterGain;
-        float micSample = mic ? mic[i] * MixConfig::micGain : 0.0f;
+        float playbackSample = playbackAudio[i] * MixConfig::masterGain;
+        float micSample = input ? input[i] * MixConfig::micGain : 0.0f;
 
-        out[i] = std::tanh(playback + micSample);
+        output[i] = std::tanh(playbackSample + micSample);
     }
 
     /*
@@ -85,6 +84,6 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
     } */
 
     if(streamer->audioFile.is_Open()) {
-        streamer->saveBuffer.write(out);
+        streamer->saveBuffer.write(output);
     }
 }

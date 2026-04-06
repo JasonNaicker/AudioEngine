@@ -11,7 +11,7 @@
 #include <atomic>
 class AudioStreamer {
 public:
-    AudioStreamer(std::span<const Sample> input, bool useMic, const std::string& outputPath = "");
+    AudioStreamer(const std::span<const Sample> input, bool useMic, const std::string& outputPath = "");
     void Start();
     void Stop();
     void Pause();
@@ -24,9 +24,9 @@ private:
     std::atomic<bool> producerEnded{false};
     std::atomic<bool> playbackEnded{false};
     //AudioBuffer networkBuffer;
-    AudioBuffer audioBuffer;
-    AudioBuffer saveBuffer;
-    AudioBuffer inputBuffer;
+    AudioBuffer audioBuffer; //Main buffer
+    AudioBuffer saveBuffer; //Saving buffer
+    AudioBuffer inputBuffer; //Unused until networking
     Producer producer;
     Consumer consumer;
     ma_device device;

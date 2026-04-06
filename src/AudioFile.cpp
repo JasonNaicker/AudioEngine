@@ -8,16 +8,10 @@
 #include <vector>
 #include <filesystem>
 
-/* @deprecated
 std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sample>& buffer) {
     AudioFormatInfo info = getFormat(path);
 
-    ma_decoder_config config = ma_decoder_config_init(
-        ma_format_f32,
-        AudioConfig::CHANNELS,
-        AudioConfig::SAMPLE_RATE
-    );
-        ma_data_converter_config config = ma_data_converter_config_init(
+    ma_data_converter_config config = ma_data_converter_config_init(
         info.format,
         ma_format_f32, 
         info.channels,
@@ -27,7 +21,7 @@ std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sam
     );
 
     ma_data_converter converter;
-    if(ma_data_converter_init(&config, nullptr, &converter) != MA_SUCCESS) 
+    if(ma_data_converter_init( &config, nullptr, &converter) != MA_SUCCESS) 
         throw std::runtime_error("Failed to init converter for: " + path);
 
     ma_uint64 frameCountIn = buffer.size() / info.channels; //Samples / channels = frameCount
@@ -42,6 +36,7 @@ std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sam
     return output;
 }
 
+/* @deprecated
 std::vector<Sample> AudioFile::loadWAV(const std::string& path) {
     if(path.empty()) throw std::runtime_error("Path is empty");
 

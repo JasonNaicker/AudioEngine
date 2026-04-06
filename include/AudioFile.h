@@ -39,7 +39,7 @@ private:
     //static std::vector<Sample> loadMP3(const std::string& path);
     //static std::vector<Sample> loadFlac(const std::string* path);
     static AudioFormatInfo getFormat(const std::string& path);
-    //static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
+    static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
     std::ofstream outputFile;
     size_t samplesWritten{0}; 
     Wav wav;

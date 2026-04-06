@@ -14,7 +14,7 @@ int main()
 {
     std::string inputPath = "C:/Code/CppPrograms/AudioStreamer/inputAudio/pcm/billie_jean_48k_f32.pcm";
     std::string outputPath = "C:/Code/CppPrograms/AudioStreamer/build/output.wav";
-    std::vector<Sample> inputBuffer = AudioFile::load(inputPath);
+    const std::vector<Sample> inputBuffer = AudioFile::load(inputPath);
     /*
     if(file.is_open()) {
         size_t fileSize = std::filesystem::file_size(inputPath);
