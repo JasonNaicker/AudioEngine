@@ -9,14 +9,27 @@
 class AudioMixer {
 public:
 
+
+
+void AudioMixer::softClip(std::span<Sample> batch, float threshold) {
+}
+
     // =========================
     // Core Gain / Amplitude
     // =========================
     static void processGain(std::span<Sample> batch, float* right, AudioBalanceMode mode);
-    static void normalize(std::span<Sample> batch, AudioBalanceMode mode) {
-        size_t max = 
+    void AudioMixer::normalize(std::span<Sample> batch, AudioBalanceMode mode) {
+        std::span<Sample>::iterator maxSample = std::ranges::max_element(batch);
+        std::transform(batch.begin(), batch.end(), batch.begin(), [maxSample](Sample s) {
+            s /= *maxSample;
+        });
     }
-    static void invertPolarity(std::span<Sample> batch, AudioBalanceMode mode);
+    void AudioMixer::invertPolarity(std::span<Sample> batch, AudioBalanceMode mode) {
+        std::transform(batch.begin(), batch.end(), batch.begin(), [](Sample s) {
+            s *= -1.0f;
+            return std::fmin(std::fmax(s, -1.0f), 1.0f);
+        });
+    }
     static void removeDCOffset(std::span<Sample> batch);
 
     // =========================
