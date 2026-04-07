@@ -1,0 +1,2 @@
+inputAudio/**/*.pcm filter=lfs diff=lfs merge=lfs -text
+inputAudio/**/*.wav filter=lfs diff=lfs merge=lfs -text
