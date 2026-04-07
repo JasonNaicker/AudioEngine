@@ -70,13 +70,13 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
         xsimd::batch<float> playbackGain(MixConfig::MASTER_GAIN);
         playbackBatch *= playbackGain;
 
-        xsimd::batch<float> micBatch = xsimd::load_unaligned(&input[i]);
+        xsimd::batch<float> micBatch = input ? xsimd::load_unaligned(&input[i]) : xsimd::batch<float>(0.0f);
         xsimd::batch<float> micGain(MixConfig::MIC_GAIN);
         micBatch *= micGain;
 
         xsimd::batch<float> result = xsimd::tanh(playbackBatch + micBatch);
 
-        result.store_aligned(&output[i]);
+        result.store_unaligned(&output[i]);
     }
     /* 
     for(size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
