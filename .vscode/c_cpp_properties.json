@@ -9,9 +9,11 @@
                 "${workspaceFolder}/include/dsp",
                 "${workspaceFolder}/include/network",
                 "${workspaceFolder}/include/libraries",
+                "${workspaceFolder}/vcpkg/packages/xsimd_x64-windows/include",
                 "${workspaceFolder}/src",
                 "C:/msys64/mingw64/include",
                 "C:/msys64/mingw64/include/opus"
+            
             ],
             "defines": [
                 "_DEBUG",
@@ -29,7 +31,10 @@
                 "-I${workspaceFolder}/include/io",
                 "-I${workspaceFolder}/include/dsp",
                 "-I${workspaceFolder}/include/network",
-                "-I${workspaceFolder}/vendor"
+                "-I${workspaceFolder}/vendor",
+                "-mavx",
+                "-Wall",
+                "-Wextra"
             ]
         }
     ],

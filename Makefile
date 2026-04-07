@@ -1,10 +1,10 @@
 # ===== Compiler =====
 CXX      := C:/msys64/mingw64/bin/g++.exe
 CXXFLAGS := -std=c++20 -g -O0 -Wall -Wextra -Wno-unused-parameter \
-            -fdiagnostics-color=always -MMD -MP
-
+            -fdiagnostics-color=always -MMD -MP -mavx
+			
 RELEASE_FLAGS := -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Wno-unused-parameter \
-                 -fdiagnostics-color=always -MMD -MP
+                 -fdiagnostics-color=always -MMD -MP -mavx
 
 # ===== Includes =====
 INCLUDES := -I./include \
@@ -14,8 +14,8 @@ INCLUDES := -I./include \
             -I./include/network \
             -I./include/libraries \
             -IC:/msys64/mingw64/include \
-            -IC:/msys64/mingw64/include/opus
-
+            -IC:/msys64/mingw64/include/opus \
+            -IC:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include
 # ===== Libraries =====
 LIB_DIRS := -LC:/msys64/mingw64/lib
 LIBS     := -lmp3lame -lavcodec -lavformat -lavutil -lswresample -lopus

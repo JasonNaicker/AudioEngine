@@ -1,10 +1,10 @@
 #pragma once
 #include <cstddef>
 namespace MixConfig {
-    inline float micGain     = 1.0f;
-    inline float playbackGain = 1.0f;
-    inline float masterGain  = 1.0f;
-    inline float micPan      = 0.0f;
-    inline float musicPan    = 0.0f;
-    inline float stereoWidth = 1.0f;
+    inline float MIC_GAIN     = 1.0f;
+    inline float PLAYBACK_GAIN = 1.0f;
+    inline float MASTER_GAIN  = 1.0f;
+    inline float MIC_PAN      = 0.0f;
+    inline float MUSIC_PAN    = 0.0f;
+    inline float STEREO_WIDTH = 1.0f;
 }
