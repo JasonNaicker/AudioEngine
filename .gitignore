@@ -6,5 +6,8 @@ build/*.o
 build/*.d
 inputAudio/*.pcm
 inputAudio/*.wav
+inputAudio/*.flac
 inputAudio/*.mp3
 inputAudio/*.exe
+inputAudio/pcm/beat_it_48_f32.pcm
+

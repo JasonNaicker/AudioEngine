@@ -1,10 +1,10 @@
 # ===== Compiler =====
 CXX      := C:/msys64/mingw64/bin/g++.exe
-CXXFLAGS := -std=c++20 -g -O0 -Wall -Wextra -Wno-unused-parameter \
-            -fdiagnostics-color=always -MMD -MP -mavx
+CXXFLAGS := -std=c++20 -g -O1 -Wall -Wextra -Wno-unused-parameter \
+            -fdiagnostics-color=always -MMD -MP -march=native
 			
-RELEASE_FLAGS := -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Wno-unused-parameter \
-                 -fdiagnostics-color=always -MMD -MP -mavx
+RELEASE_FLAGS := -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wno-unused-parameter \
+                 -fdiagnostics-color=always -MMD -MP -march=native -ffast-math
 
 # ===== Includes =====
 INCLUDES := -I./include \

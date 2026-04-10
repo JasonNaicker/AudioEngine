@@ -31,6 +31,9 @@ AudioStreamer::AudioStreamer(const std::span<const Sample> input, bool useMic, c
     if(ma_device_init(NULL, &config, &device) != MA_SUCCESS) {
         throw std::runtime_error("Failed to initialize audio device");
     }
+    
+    _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+    _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 };
 
 void AudioStreamer::Start() {
@@ -62,30 +65,20 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
     const Sample* input = (const Sample*) pInput;
     Sample* output = (Sample*) pOutput;
 
-    alignas(32) Sample playbackAudio[AudioConfig::SAMPLE_SIZE] = {}; //Regular playback
-    bool audioSuccess = streamer->audioBuffer.read((Sample*) playbackAudio); //Read into intermediary buffer
+    alignas(32) Sample playbackAudio[AudioConfig::SAMPLE_SIZE]; //Regular playback
+    bool audioSuccess = streamer->audioBuffer.read((Sample*) playbackAudio); 
 
-    for(size_t i = 0; i + 7 < AudioConfig::SAMPLE_SIZE; i += 8) {
-        xsimd::batch<float> playbackBatch = xsimd::load_aligned(&playbackAudio[i]);
-        xsimd::batch<float> playbackGain(MixConfig::MASTER_GAIN);
-        playbackBatch *= playbackGain;
+    xsimd::batch<float> playbackGain(MixConfig::MASTER_GAIN);
+    xsimd::batch<float> micGain(MixConfig::MIC_GAIN);
 
-        xsimd::batch<float> micBatch = input ? xsimd::load_unaligned(&input[i]) : xsimd::batch<float>(0.0f);
-        xsimd::batch<float> micGain(MixConfig::MIC_GAIN);
-        micBatch *= micGain;
-
-        xsimd::batch<float> result = xsimd::tanh(playbackBatch + micBatch);
-
+    for(size_t i = 0; i + SimdBatch::size <= AudioConfig::SAMPLE_SIZE; i += SimdBatch::size) {
+        _mm_prefetch((const char*) &playbackAudio[i + 4 * SimdBatch::size], _MM_HINT_T0); //Prefetch into L1 cache
+        SimdBatch playbackBatch = xsimd::load_aligned(&playbackAudio[i]);
+        SimdBatch micBatch = input ? xsimd::load_unaligned(&input[i]) : SimdBatch(0.0f);
+        SimdBatch sum = (playbackBatch * playbackGain) + (micBatch * micGain);
+        SimdBatch result = sum - sum * sum * sum / 3.0f; //Cubic soft clip
         result.store_unaligned(&output[i]);
     }
-    /* 
-    for(size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
-        float playbackSample = playbackAudio[i] * MixConfig::MASTER_GAIN;
-        float micSample = input ? input[i] * MixConfig::MIC_GAIN : 0.0f;
-
-        output[i] = std::tanh(playbackSample + micSample);
-    }
-    */
 
     if(streamer->audioFile.isOpen()) {
         streamer->saveBuffer.write(output);

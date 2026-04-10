@@ -97,8 +97,32 @@ build/core/AudioStreamer.o: src/core/AudioStreamer.cpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_sse4_2.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_sse4_2_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_sse.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_sse_register.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_avx.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_avx_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx2.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx2_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_avx2.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_avx2_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512f.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512f_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512dq.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512dq_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512bw.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512bw_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512ifma.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512ifma_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vbmi.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vbmi_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vbmi2.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vbmi2_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vnni_avx512bw.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vnni_avx512bw_register.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vnni_avx512vbmi2.hpp \
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vnni_avx512vbmi2_register.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_common.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/common/xsimd_common_arithmetic.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch_constant.hpp \
@@ -230,8 +254,32 @@ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_sse4_2.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_sse4_2_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_sse.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_sse_register.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_avx.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_avx_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx2.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx2_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_fma3_avx2.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_fma3_avx2_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512f.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512f_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512dq.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512dq_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512bw.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512bw_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512ifma.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512ifma_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vbmi.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vbmi_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vbmi2.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vbmi2_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vnni_avx512bw.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vnni_avx512bw_register.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_avx512vnni_avx512vbmi2.hpp:
+C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_avx512vnni_avx512vbmi2_register.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/xsimd_common.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/arch/common/xsimd_common_arithmetic.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch_constant.hpp:
