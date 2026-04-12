@@ -6,7 +6,7 @@
 
 class Producer {
 public:
-    Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded);
+    Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded, std::atomic<bool>& paused);
 
     void start();
     void stop();
@@ -14,9 +14,11 @@ public:
 private:
     void worker();        
 
-    std::atomic<bool>& producerEnded;
+    std::atomic<bool>& producerEnded; //Unused
     AudioBuffer& audioBuffer;
     std::atomic<bool> running{false};
+    std::atomic<bool>& paused;
     std::thread thread;
     std::span<const Sample> input;
+    size_t sampleIndex;
 };

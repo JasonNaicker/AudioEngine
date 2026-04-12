@@ -1,8 +1,7 @@
 build/core/AudioStreamer.o: src/core/AudioStreamer.cpp \
  include/core/AudioStreamer.h include/libraries/miniaudio.h \
  include/core/AudioTypes.h include/core/CircularBuffer.h \
- include/core/AudioConfig.h include/io/Consumer.h include/io/AudioFile.h \
- include/io/Wav.h include/io/Producer.h include/dsp/MixConfig.h \
+ include/core/AudioConfig.h \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/xsimd.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_config.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_inline.hpp \
@@ -149,17 +148,14 @@ build/core/AudioStreamer.o: src/core/AudioStreamer.cpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_api.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch.hpp \
- C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp
+ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp \
+ include/io/Consumer.h include/io/AudioFile.h include/io/Wav.h \
+ include/io/Producer.h include/dsp/MixConfig.h
 include/core/AudioStreamer.h:
 include/libraries/miniaudio.h:
 include/core/AudioTypes.h:
 include/core/CircularBuffer.h:
 include/core/AudioConfig.h:
-include/io/Consumer.h:
-include/io/AudioFile.h:
-include/io/Wav.h:
-include/io/Producer.h:
-include/dsp/MixConfig.h:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/xsimd.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_config.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_inline.hpp:
@@ -307,3 +303,8 @@ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_api.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp:
+include/io/Consumer.h:
+include/io/AudioFile.h:
+include/io/Wav.h:
+include/io/Producer.h:
+include/dsp/MixConfig.h:

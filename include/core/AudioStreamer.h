@@ -21,7 +21,7 @@ private:
     static void audioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
     AudioFile audioFile;
     std::atomic<bool> paused{false};
-    std::atomic<bool> producerEnded{false};
+    std::atomic<bool> producerEnded{false}; //Unused
     std::atomic<bool> playbackEnded{false};
     //AudioBuffer networkBuffer;
     AudioBuffer audioBuffer; //Main buffer

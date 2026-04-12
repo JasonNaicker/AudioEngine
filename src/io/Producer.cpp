@@ -7,7 +7,7 @@
 #include <atomic>
 #include <iostream>
 
-Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded) : producerEnded(producerEnded), audioBuffer(audioBuffer), input(input){};
+Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded,  std::atomic<bool>& paused) : producerEnded(producerEnded), paused(paused), audioBuffer(audioBuffer), input(input), sampleIndex(0){};
 
 void Producer::worker() {
     if (input.empty()) {
@@ -16,15 +16,19 @@ void Producer::worker() {
         return;
     }
     const size_t inputSize = input.size();
-    size_t sampleIndex = 0;
+    //sampleIndex = 0;
     while (running) {
+        if (paused) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            continue;
+        }
         //Fixed input only, otherwise dynamic input never ends
         if(sampleIndex == inputSize) {
             running = false;
             producerEnded = true;
             break;
         }
-        std::span<const Sample> dataToWrite = input.subspan(sampleIndex, AudioConfig::SAMPLE_SIZE);
+        std::span<const Sample> dataToWrite = input.subspan(sampleIndex, AudioConfig::SAMPLE_SIZE); //Not overwriting, check for over-read
         bool success_play = audioBuffer.write(dataToWrite.data());
 
         if(success_play) {

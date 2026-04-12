@@ -29,10 +29,10 @@ public:
 
         for(size_t i = 0; i + size <= batch.size(); i += size) {
             _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
-            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
+            SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
             maxBatch = xsimd::max(maxBatch, xsimd::abs(currentBatch));
         }
-        Sample maxVal = xsimd::reduce_max(maxBatch);
+        Sample maxVal = xsimd::reduce_max(maxBatch); //Horizontal reduction
 
         if(maxVal <= Sample(0)) return;
 
@@ -40,20 +40,48 @@ public:
         const SimdBatch invGain = SimdBatch(Sample(1)) / batchGain;
 
         for(size_t i = 0; i + size < batch.size(); i += size) {
-            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
+            SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
             currentBatch *= invGain;
-            xsimd::store_unaligned(batch.data() + i, currentBatch);
+            currentBatch.store_aligned(batch.data() + i);
         }
     }
 
     static void invertPolarity(std::span<Sample>& batch, AudioBalanceMode) {
-        std::transform(batch.begin(), batch.end(), batch.begin(),
-            [](Sample s) {
-                return -s;
-            });
+        if (batch.empty()) return;
+    
+        constexpr size_t size = SimdBatch::size;
+
+        for(size_t i = 0; i + size <= batch.size(); i += size) {
+            _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
+            SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
+            currentBatch *= Sample(-1);
+            currentBatch.store_aligned(batch.data() + i);
+        }
+
     }
 
-    static void removeDCOffset(std::span<Sample>& batch);
+    static void removeDCOffset(std::span<Sample>& batch) {
+        if (batch.empty()) return;
+    
+        constexpr size_t size = SimdBatch::size;
+        float avg = 0.0f;
+        const float EPSILON = 1e-6f;
+
+        for(size_t i = 0; i + size <= batch.size(); i += size) {
+            _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
+            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
+            avg += xsimd::reduce_add(currentBatch);
+        }
+        avg /= batch.size();
+        if(fabs(avg) < EPSILON) return;
+
+        for(size_t i = 0; i + size < batch.size(); i += size) {
+            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
+            currentBatch -= avg;
+            Sample(currentBatch[i]);
+            currentBatch.store_aligned(batch.data() + i);
+        }
+    }
 
     // =========================
     // Dynamics
@@ -97,12 +125,6 @@ public:
     // =========================
     static void distortion(std::span<Sample>& batch, float drive, AudioBalanceMode mode);
     static void softClip(std::span<Sample>& batch, float threshold, AudioBalanceMode mode);
-    static void removeDCOffset(std::span<Sample> batch) {
-        Sample avgSample = std::accumulate(batch.begin(), batch.end(), 0.0f) / batch.size();
-        std::transform(batch.begin(), batch.end(), batch.begin(), [avgSample](Sample s) {
-            return s -= avgSample;
-    });
-}
     // =========================
     // Envelope / Control
     // =========================
