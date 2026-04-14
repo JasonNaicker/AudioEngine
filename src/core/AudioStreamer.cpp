@@ -62,24 +62,23 @@ void AudioStreamer::Resume() {
 void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     AudioStreamer* streamer = (AudioStreamer*) pDevice->pUserData;
     if (streamer->paused) {
-        std::memset(pOutput, 0,
-            frameCount * AudioConfig::CHANNELS * sizeof(Sample));
+        std::memset(pOutput, 0, frameCount * AudioConfig::CHANNELS * sizeof(Sample)); 
         return;
-    }
+    }   
     const Sample* input = (const Sample*) pInput;
     Sample* output = (Sample*) pOutput;
 
     alignas(32) Sample playbackAudio[AudioConfig::SAMPLE_SIZE]; //Regular playback
     bool audioSuccess = streamer->audioBuffer.read((Sample*) playbackAudio); 
 
-    xsimd::batch<float> playbackGain(MixConfig::PLAYBACK_GAIN);
-    xsimd::batch<float> micGain(MixConfig::MIC_GAIN);
+    xsimd::batch<float> playbackGain(MixConfig::PLAYBACK_GAIN * MixConfig::MASTER_GAIN);
+    xsimd::batch<float> micGain(MixConfig::MIC_GAIN * MixConfig::MASTER_GAIN);
 
     for(size_t i = 0; i + SimdBatch::size <= AudioConfig::SAMPLE_SIZE; i += SimdBatch::size) {
         _mm_prefetch((const char*) &playbackAudio[i + 4 * SimdBatch::size], _MM_HINT_T0); //Prefetch into L1 cache
         SimdBatch playbackBatch = xsimd::load_aligned(&playbackAudio[i]);
         SimdBatch micBatch = input ? xsimd::load_unaligned(&input[i]) : SimdBatch(0.0f);
-        SimdBatch sum = ((playbackBatch * playbackGain) + (micBatch * micGain)) * MixConfig::MASTER_GAIN;
+        SimdBatch sum = xsimd::fma(playbackBatch, playbackGain, micBatch * micGain);
         SimdBatch result = sum - sum * sum * sum / 3.0f; //Cubic soft clip
         result.store_unaligned(&output[i]);
     }

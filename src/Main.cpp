@@ -18,9 +18,9 @@ int main()
 
     AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, false, outputPath);
     audioStream.Start();
-    std::this_thread::sleep_for(std::chrono::seconds(8));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
     audioStream.Pause();
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
     audioStream.Resume();
     std::this_thread::sleep_for(std::chrono::seconds(300)); // 5 minutes
     audioStream.Stop();

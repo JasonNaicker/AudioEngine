@@ -28,7 +28,7 @@ public:
         SimdBatch maxBatch = SimdBatch(0.0f);
 
         for(size_t i = 0; i + size <= batch.size(); i += size) {
-            _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
+            _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
             SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
             maxBatch = xsimd::max(maxBatch, xsimd::abs(currentBatch));
         }
@@ -39,7 +39,7 @@ public:
         const SimdBatch batchGain(maxVal);
         const SimdBatch invGain = SimdBatch(Sample(1)) / batchGain;
 
-        for(size_t i = 0; i + size < batch.size(); i += size) {
+        for(size_t i = 0; i + size <= batch.size(); i += size) {
             SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
             currentBatch *= invGain;
             currentBatch.store_aligned(batch.data() + i);
@@ -52,12 +52,11 @@ public:
         constexpr size_t size = SimdBatch::size;
 
         for(size_t i = 0; i + size <= batch.size(); i += size) {
-            _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
+            _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
             SimdBatch currentBatch = xsimd::load_aligned(batch.data() + i);
             currentBatch *= Sample(-1);
             currentBatch.store_aligned(batch.data() + i);
         }
-
     }
 
     static void removeDCOffset(std::span<Sample>& batch) {
@@ -67,8 +66,8 @@ public:
         float avg = 0.0f;
         const float EPSILON = 1e-6f;
 
-        for(size_t i = 0; i + size <= batch.size(); i += size) {
-            _mm_prefetch((const char*) (batch.data() + i + 4 * size), _MM_HINT_T0);
+        for(size_t i = 0; i + size < batch.size(); i += size) {
+            _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
             SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
             avg += xsimd::reduce_add(currentBatch);
         }
@@ -174,8 +173,12 @@ public:
     // =========================
     template<typename Func>
     inline static void apply(std::span<Sample>& batch, Func f) {
-        for (auto s : batch) {
-            s = f(s);
+        constexpr size_t size = SimdBatch::size;
+        for(size_t i = 0; i + size <= batch.size(); i += size) {
+            _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
+            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
+            f(currentBatch);
+            currentBatch.store_aligned(batch.size() + i);
         }
     }
 
@@ -213,4 +216,6 @@ public:
 
         std::copy(result.begin(), result.end(), input.begin());
     }
+private:
+    static const size_t PREFETCH_AMOUNT = 4;
 };
