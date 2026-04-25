@@ -73,7 +73,7 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
 
     xsimd::batch<float> playbackGain(MixConfig::PLAYBACK_GAIN * MixConfig::MASTER_GAIN);
     xsimd::batch<float> micGain(MixConfig::MIC_GAIN * MixConfig::MASTER_GAIN);
-
+   
     for(size_t i = 0; i + SimdBatch::size <= AudioConfig::SAMPLE_SIZE; i += SimdBatch::size) {
         _mm_prefetch((const char*) &playbackAudio[i + 4 * SimdBatch::size], _MM_HINT_T0); //Prefetch into L1 cache
         SimdBatch playbackBatch = xsimd::load_aligned(&playbackAudio[i]);

@@ -5,19 +5,30 @@
 #include <miniaudio.h>
 #include <fstream>
 #include <string>
-#include <vector>
+#include <span>
 #include <filesystem>
 
-std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sample>& buffer) {
+std::vector<Sample> AudioFile::reformat(const std::string& path, std::span<const Sample> buffer, const AudioFormatInfo& opts) {
+    if (buffer.empty()) return {};
+
     AudioFormatInfo info = getFormat(path);
+
+    if (info.format == opts.format &&
+    info.channels == opts.channels &&
+    info.sampleRate == opts.sampleRate) {
+    return std::vector<Sample>(buffer.begin(),buffer.end()); 
+}
+
+    if (buffer.size() % info.channels != 0) 
+        throw std::runtime_error("Invalid buffer size for channel count: " + path);
 
     ma_data_converter_config config = ma_data_converter_config_init(
         info.format,
-        ma_format_f32, 
+        opts.format, 
         info.channels,
-        AudioConfig::CHANNELS,
+        opts.channels,
         info.sampleRate,
-        AudioConfig::SAMPLE_RATE
+        opts.sampleRate
     );
 
     ma_data_converter converter;
@@ -29,7 +40,8 @@ std::vector<Sample> AudioFile::reformat(const std::string& path, std::vector<Sam
     ma_data_converter_get_expected_output_frame_count(&converter, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
     
     std::vector<Sample> output(frameCountOut * AudioConfig::CHANNELS);
-    if (ma_data_converter_process_pcm_frames(&converter, buffer.data(), &frameCountIn, output.data(), &frameCountOut)) 
+    output.resize(frameCountOut * opts.channels);
+    if (ma_data_converter_process_pcm_frames(&converter, buffer.data(), &frameCountIn, output.data(), &frameCountOut) != MA_SUCCESS) 
         throw std::runtime_error("Failed to convert PCM frames for: " + path);
 
     ma_data_converter_uninit(&converter, nullptr);
@@ -158,7 +170,7 @@ void AudioFile::flush() {
     outputFile.flush();
 }
 
-bool AudioFile::isOpen() {
+bool AudioFile::isOpen() const {
     return outputFile.is_open();
 }
 

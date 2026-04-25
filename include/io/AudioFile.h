@@ -4,16 +4,16 @@
 #include "AudioTypes.h"
 #include "Wav.h"
 #include <vector>
+#include <span>
 #include <fstream>
 #include <string>
 #include <stdexcept>
 
 struct AudioFormatInfo {
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
+    ma_format format = ma_format_f32;
+    ma_uint32 channels = AudioConfig::CHANNELS;
+    ma_uint32 sampleRate = AudioConfig::SAMPLE_RATE;
 };
-
 class AudioFile {
 public:
     enum class Format {WAV, MP3, FLAC, NONE};
@@ -26,7 +26,7 @@ public:
     void finalWrite();
     void close();
     void flush();
-    bool isOpen();
+    bool isOpen() const;
 
 private:
     static std::vector<Sample> loadPCM(const std::string& path);
@@ -34,7 +34,7 @@ private:
     //static std::vector<Sample> loadMP3(const std::string& path);
     //static std::vector<Sample> loadFlac(const std::string* path);
     static AudioFormatInfo getFormat(const std::string& path);
-    static std::vector<Sample> reformat(const std::string& path, std::vector<Sample>& buffer);
+    static std::vector<Sample> reformat(const std::string& path, std::span<const Sample> buffer, const AudioFormatInfo& opts = {});
     std::ofstream outputFile;
     size_t samplesWritten{0}; 
     Wav wav;
