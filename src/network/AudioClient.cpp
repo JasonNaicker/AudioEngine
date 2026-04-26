@@ -1,7 +1,7 @@
 #include "AudioClient.h"
 #include <winsock2.h>
 #include <stdexcept>
-
+/*
 AudioClient::AudioClient() {
     WSADATA wsaData;
 
@@ -10,10 +10,10 @@ AudioClient::AudioClient() {
         printf("WSAStartup failed: %d\n", iResult);
         throw std::runtime_error("WSAStartup Failed");
     }
-}
+}*/
 
 AudioClient::~AudioClient() {
-    WSACleanup();
+    //WSACleanup();
 }
 
 void AudioClient::Start() {
