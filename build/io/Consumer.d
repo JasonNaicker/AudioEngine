@@ -148,7 +148,8 @@ build/io/Consumer.o: src/io/Consumer.cpp include/io/AudioFile.h \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_api.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp \
- include/io/Wav.h include/io/Consumer.h
+ include/io/Wav.h include/dsp/AudioMixer.h include/core/AudioBalance.h \
+ include/dsp/MixConfig.h include/io/Consumer.h
 include/io/AudioFile.h:
 include/libraries/miniaudio.h:
 include/core/AudioConfig.h:
@@ -302,4 +303,7 @@ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch.hpp:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp:
 include/io/Wav.h:
+include/dsp/AudioMixer.h:
+include/core/AudioBalance.h:
+include/dsp/MixConfig.h:
 include/io/Consumer.h:

@@ -11,7 +11,7 @@
 Consumer::Consumer(AudioBuffer& saveBuffer, AudioFile& audioFile, std::atomic<bool>& playbackEnded) : playbackEnded(playbackEnded), audioFile(audioFile), saveBuffer(saveBuffer) {};
 
 void Consumer::worker() {
-    Sample data[AudioConfig::SAMPLE_SIZE];
+    alignas(32) Sample data[AudioConfig::SAMPLE_SIZE];
     std::span<Sample> dataToRead(data, AudioConfig::SAMPLE_SIZE);
 
     while (running) {
@@ -40,6 +40,7 @@ void Consumer::start() {
 }
 
 void Consumer::stop() {
+    audioFile.finalWrite();
     //running = false; (Won't save because it will not final write before execution immediately finishes)
     if (thread.joinable()) thread.join();
 }

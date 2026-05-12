@@ -3,6 +3,7 @@
 #include "AudioFile.h"
 #include "AudioTypes.h"
 #include "MixConfig.h"
+#include "AudioMixer.h"
 #include "Wav.h"
 #include <iostream>
 #include <fstream>
@@ -79,8 +80,8 @@ void AudioStreamer::audioCallback(ma_device* pDevice, void* pOutput, const void*
         SimdBatch playbackBatch = xsimd::load_aligned(&playbackAudio[i]);
         SimdBatch micBatch = input ? xsimd::load_unaligned(&input[i]) : SimdBatch(0.0f);
         SimdBatch sum = xsimd::fma(playbackBatch, playbackGain, micBatch * micGain);
-        SimdBatch result = sum - sum * sum * sum / 3.0f; //Cubic soft clip
-        result.store_unaligned(&output[i]);
+        sum = AudioMixer::softClip(sum);
+        sum.store_unaligned(&output[i]);
     }
 
     if(streamer->audioFile.isOpen()) {

@@ -32,5 +32,4 @@ private:
     ma_device device;
     
     bool useMic;
-
 };

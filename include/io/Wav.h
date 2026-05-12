@@ -1,9 +1,12 @@
 #pragma once
 #include "AudioConfig.h"
 #include "AudioTypes.h"
+#include "AudioMixer.h"
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <immintrin.h>
+#include <xsimd/xsimd.hpp>
 
 class Wav {
 public:
@@ -55,13 +58,29 @@ public:
         //Data at offset 44
     }
 
+    //Add explicit vectorization loop
     void writeData(std::ofstream &file, const Sample* batch) {
+        alignas(32) int32_t temp[AudioConfig::SAMPLE_SIZE];
         SampleSaved converted[AudioConfig::SAMPLE_SIZE];
+        for(size_t i = 0; i + SimdBatch::size <= AudioConfig::SAMPLE_SIZE; i += SimdBatch::size) {
+            _mm_prefetch((const char*) &batch[i + 4 * SimdBatch::size], _MM_HINT_T0);
+            SimdBatch saveBatch = xsimd::load_unaligned(&batch[i]);
+            saveBatch = AudioMixer::softClip(saveBatch);
+            auto result = xsimd::to_int(saveBatch * 32767.0f);
+            result.store_aligned(&temp[i]);
+        }
+        for(size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
+            converted[i] = static_cast<SampleSaved>(temp[i]);
+        }
+        file.write((const char*) converted, AudioConfig::SAMPLE_SIZE * sizeof(SampleSaved));
+
+        /*
         for (size_t i = 0; i < AudioConfig::SAMPLE_SIZE; i++) {
             float clamped = std::clamp(batch[i], -1.0f, 1.0f);
             converted[i] = static_cast<SampleSaved>(clamped * 32767.0f);
         }
         file.write((const char*) converted, AudioConfig::SAMPLE_SIZE * sizeof(SampleSaved));
+        */
     }
 
     void writeSize(std::ofstream &file, const size_t dataSize) {

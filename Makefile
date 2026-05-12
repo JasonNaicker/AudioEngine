@@ -18,8 +18,7 @@ INCLUDES := -I./include \
             -IC:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include
 # ===== Libraries =====
 LIB_DIRS := -LC:/msys64/mingw64/lib
-LIBS     := -lmp3lame -lavcodec -lavformat -lavutil -lswresample -lopus
-
+LIBS     := -lmp3lame -lavcodec -lavformat -lavutil -lswresample -lopus -lws2_32
 # ===== Directories =====
 SRC_DIR    := ./src
 BUILD_DIR  := ./build

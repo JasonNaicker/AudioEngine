@@ -7,7 +7,7 @@
 #include <atomic>
 #include <iostream>
 
-Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded,  std::atomic<bool>& paused) : producerEnded(producerEnded), paused(paused), audioBuffer(audioBuffer), input(input), sampleIndex(0){};
+Producer::Producer(AudioBuffer& audioBuffer, std::span<const Sample> input, std::atomic<bool>& producerEnded,  std::atomic<bool>& paused) : producerEnded(producerEnded), audioBuffer(audioBuffer), paused(paused), input(input), sampleIndex(0){};
 
 void Producer::worker() {
     if (input.empty()) {

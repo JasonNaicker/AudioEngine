@@ -59,27 +59,10 @@ public:
         }
     }
 
-    static void removeDCOffset(std::span<Sample>& batch) {
-        if (batch.empty()) return;
-    
-        constexpr size_t size = SimdBatch::size;
-        float avg = 0.0f;
-        const float EPSILON = 1e-6f;
-
-        for(size_t i = 0; i + size < batch.size(); i += size) {
-            _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
-            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
-            avg += xsimd::reduce_add(currentBatch);
-        }
-        avg /= batch.size();
-        if(fabs(avg) < EPSILON) return;
-
-        for(size_t i = 0; i + size < batch.size(); i += size) {
-            SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
-            currentBatch -= avg;
-            Sample(currentBatch[i]);
-            currentBatch.store_aligned(batch.data() + i);
-        }
+    inline static SimdBatch removeDCOffset(SimdBatch batch) {
+        float avg = xsimd::reduce_add(batch) / SimdBatch::size;
+        if(fabs(avg) < 1e-6f) return batch;
+        return batch - SimdBatch(avg);
     }
 
     // =========================
@@ -123,7 +106,9 @@ public:
     // Nonlinear / Tone Shaping
     // =========================
     static void distortion(std::span<Sample>& batch, float drive, AudioBalanceMode mode);
-    static void softClip(std::span<Sample>& batch, float threshold, AudioBalanceMode mode);
+    static inline SimdBatch softClip(SimdBatch batch) {
+        return batch - batch * batch * batch / 3.0f;
+    }
     // =========================
     // Envelope / Control
     // =========================
@@ -178,7 +163,7 @@ public:
             _mm_prefetch((const char*) (batch.data() + i + PREFETCH_AMOUNT * size), _MM_HINT_T0);
             SimdBatch currentBatch = xsimd::load_unaligned(batch.data() + i);
             f(currentBatch);
-            currentBatch.store_aligned(batch.size() + i);
+            currentBatch.store_unaligned(batch.data() + i);
         }
     }
 

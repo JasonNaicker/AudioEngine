@@ -150,7 +150,8 @@ build/core/AudioStreamer.o: src/core/AudioStreamer.cpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_batch.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp \
  include/io/Consumer.h include/io/AudioFile.h include/io/Wav.h \
- include/io/Producer.h include/dsp/MixConfig.h
+ include/dsp/AudioMixer.h include/core/AudioBalance.h \
+ include/dsp/MixConfig.h include/io/Producer.h
 include/core/AudioStreamer.h:
 include/libraries/miniaudio.h:
 include/core/AudioTypes.h:
@@ -306,5 +307,7 @@ C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd
 include/io/Consumer.h:
 include/io/AudioFile.h:
 include/io/Wav.h:
-include/io/Producer.h:
+include/dsp/AudioMixer.h:
+include/core/AudioBalance.h:
 include/dsp/MixConfig.h:
+include/io/Producer.h:

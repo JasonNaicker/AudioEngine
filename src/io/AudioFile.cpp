@@ -158,8 +158,12 @@ void AudioFile::writeBatch(const Sample* batch) {
 }
 
 void AudioFile::finalWrite() {
-    int dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
-    wav.writeSize(outputFile, dataSize);
+    if(format == Format::WAV) {
+        int dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
+        wav.writeSize(outputFile, dataSize);
+    } else if (format == Format::MP3) {
+        throw std::runtime_error("MP3 saving not yet implemented");
+    }
 }
 
 void AudioFile::close() {
