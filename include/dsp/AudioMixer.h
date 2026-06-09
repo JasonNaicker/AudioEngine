@@ -93,6 +93,14 @@ public:
     static void simpleEcho(std::span<Sample>& batch, int delaySamples, float feedback, AudioBalanceMode mode);
     static void reverb(std::span<Sample>& batch, int roomSize, float feedback, AudioBalanceMode mode);
 
+     // =========================
+    // Time-Sequence Effects
+    // =========================
+    static void WSOLA(std::span<Sample>* batch) {
+
+        
+    }
+
     // =========================
     // Modulation Effects
     // =========================
