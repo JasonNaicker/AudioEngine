@@ -21,13 +21,25 @@ struct AudioData {
     AudioFormatInfo sourceFormat;
     AudioFormatInfo runtimeFormat;
 };
+
+struct DecoderGuard {
+    ma_decoder dec{};
+    bool active = false;
+    ~DecoderGuard() {if (active) ma_decoder_uninit(&dec);}
+};
+struct ConverterGuard {
+    ma_data_converter conv{};
+    bool active = false;
+    ~ConverterGuard() {if (active) ma_data_converter_uninit(&conv, nullptr);}
+};
+
 class AudioFile {
 public:
     enum class Format {WAV, MP3, FLAC, NONE};
 
-    static AudioData load(const std::string& path, std::optional<AudioFormatInfo> info = std::nullopt);
+    static AudioData load(const std::string& path, std::optional<AudioFormatInfo> inputInfo = std::nullopt);
     static void pad(std::vector<Sample>& buffer);
-    void open(const std::string& path);
+    void openOutputFile(const std::string& path);
     void writeBatch(const Sample* batch);
     void finalWrite();
     void close();

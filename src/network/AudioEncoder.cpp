@@ -25,7 +25,6 @@ int AudioEncoder::getBandwidth() const {
     opus_int32 bw{};
     int _valid = opus_encoder_ctl(encoder.get(), OPUS_GET_BANDWIDTH(&bw)) == OPUS_OK;
     return _valid;
-
 }
 
 bool AudioEncoder::setBitrate(int bitrate) {

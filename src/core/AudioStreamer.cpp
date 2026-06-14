@@ -12,7 +12,7 @@
 #include <xsimd/xsimd.hpp>
 
 AudioStreamer::AudioStreamer(const std::span<const Sample> input, bool useMic, const std::string& outputPath) : audioBuffer(AudioConfig::BUFFER_SIZE), saveBuffer(AudioConfig::BUFFER_SIZE), inputBuffer(AudioConfig::BUFFER_SIZE), producer(audioBuffer, input, producerEnded, paused), consumer(saveBuffer, audioFile, playbackEnded), useMic(useMic){
-    audioFile.open(outputPath);
+    audioFile.openOutputFile(outputPath);
     ma_device_type deviceType = useMic ? ma_device_type_duplex : ma_device_type_playback;
     ma_device_config config = ma_device_config_init(deviceType);
     config.playback.format = ma_format_f32;

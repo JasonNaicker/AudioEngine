@@ -16,19 +16,13 @@ int main()
     const std::string outputPath = "C:/Code/CppPrograms/AudioStreamer/build/output.wav";
 
 
-    const AudioFormatInfo info = {
+    const AudioFormatInfo infoFormat = {
         ma_format_f32,
         AudioConfig::CHANNELS,
         AudioConfig::SAMPLE_RATE
     };
-     std::vector<Sample> inputBuffer = AudioFile::load(inputPath, info).buffer;
-     const AudioFormatInfo test = {
-        ma_format_f32,
-        AudioConfig::CHANNELS,
-        AudioConfig::SAMPLE_RATE
-    };
+     std::vector<Sample> inputBuffer = AudioFile::load(inputPath, infoFormat).buffer;
 
-    inputBuffer = AudioFile::reformat(inputBuffer, info, test);
     AudioStreamer audioStream(std::span<const Sample>{inputBuffer}, false, outputPath);
     audioStream.Start();
     std::this_thread::sleep_for(std::chrono::seconds(10));

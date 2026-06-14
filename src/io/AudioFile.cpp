@@ -28,23 +28,26 @@ std::vector<Sample> AudioFile::reformat(std::span<const Sample> buffer, const Au
         output.sampleRate
     );
 
-    ma_data_converter converter;
-    if(ma_data_converter_init( &config, nullptr, &converter) != MA_SUCCESS) 
+    ConverterGuard cg;
+    if(ma_data_converter_init( &config, nullptr, &cg.conv) != MA_SUCCESS) 
         throw std::runtime_error("Failed to init converter for: ");
+    cg.active = true;
 
-    ma_uint64 frameCountIn = buffer.size() / input.channels; //Samples / channels = frameCount
+    const ma_uint64 inputFrames = buffer.size() / input.channels; //Samples / channels = frameCount
+    ma_uint64 frameCountIn = inputFrames; //Amount of frames consumed by input
     ma_uint64 frameCountOut = 0; //Updated frame count with new Frame rate
     //ceil(inputFrames * outputSampleRate / inputSampleRate)
-    ma_data_converter_get_expected_output_frame_count(&converter, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
-    frameCountOut += 64;
+    ma_data_converter_get_expected_output_frame_count(&cg.conv, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
+    frameCountOut += 64; //Slack for resampler delay/rounding
 
     std::vector<Sample> outBuffer(frameCountOut * output.channels);
-    if (ma_data_converter_process_pcm_frames(&converter, buffer.data(), &frameCountIn, outBuffer.data(), &frameCountOut) != MA_SUCCESS) {
-        ma_data_converter_uninit(&converter, nullptr);
+    if (ma_data_converter_process_pcm_frames(&cg.conv, buffer.data(), &frameCountIn, outBuffer.data(), &frameCountOut) != MA_SUCCESS) {
         throw std::runtime_error("Failed to convert PCM frames");
     }
 
-    ma_data_converter_uninit(&converter, nullptr);
+    if (frameCountIn != inputFrames)
+        throw std::runtime_error("Converter did not consume the full input buffer");
+
     outBuffer.resize(frameCountOut * output.channels);
     return outBuffer;
 }
@@ -56,65 +59,79 @@ std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
     if (!file.is_open()) throw std::runtime_error("Failed to load: " + path);
 
     size_t fileSize = std::filesystem::file_size(path);
+    if (fileSize % sizeof(Sample) != 0) 
+        throw std::runtime_error("PCM file must divide evenly into Sample Size: " + path);
+
     std::vector<Sample> inputBuffer(fileSize / sizeof(Sample));
-    file.read((char*) inputBuffer.data(), fileSize);
+    const std::streamsize bytes = static_cast<std::streamsize>(inputBuffer.size() * sizeof(Sample));
+    file.read(reinterpret_cast<char*>(inputBuffer.data()), bytes);
+
+    if (file.gcount() != bytes)
+        throw std::runtime_error("Failed to load the full PCM file: " + path);
     return inputBuffer;
 }
 
 AudioFormatInfo AudioFile::getFormat(const std::string& path) {
     if(path.empty()) throw std::runtime_error("Path is empty");
-    ma_decoder decoder;
-    if(ma_decoder_init_file(path.c_str(), nullptr, &decoder) != MA_SUCCESS) throw std::runtime_error("Failed to inspect: " + path);
+    DecoderGuard dg;
+    if(ma_decoder_init_file(path.c_str(), nullptr, &dg.dec) != MA_SUCCESS) throw std::runtime_error("Failed to inspect: " + path);
 
     AudioFormatInfo info;
-    ma_decoder_get_data_format(&decoder, &info.format, &info.channels, &info.sampleRate, nullptr, 0);
+    ma_decoder_get_data_format(&dg.dec, &info.format, &info.channels, &info.sampleRate, nullptr, 0);
 
-    ma_decoder_uninit(&decoder);
     return info;
 }
 
-AudioData AudioFile::load(const std::string& path, std::optional<AudioFormatInfo> info) {
+AudioData AudioFile::load(const std::string& path, std::optional<AudioFormatInfo> inputInfo) {
     if (path.empty()) throw std::runtime_error("Path is empty");
 
     AudioData data;
     std::vector<Sample> buffer;
 
+    const AudioFormatInfo outputInfo = {
+        ma_format_f32,
+        AudioConfig::CHANNELS,
+        AudioConfig::SAMPLE_RATE
+    };
+
     if (path.ends_with(".pcm")) {
-        if (!info.has_value()) 
+        if (!inputInfo.has_value()) 
             throw std::runtime_error("PCM file requries AudioFormatInfo: " + path);
-        buffer = loadPCM(path);
-        data.sourceFormat = *info;
+        buffer = reformat(loadPCM(path), *inputInfo, outputInfo);
+        data.sourceFormat = *inputInfo;
     } else {
         data.sourceFormat = getFormat(path); //get AudioFormatInfo
 
+        //Always convert internally to this format
         ma_decoder_config config = ma_decoder_config_init(
             ma_format_f32,
             AudioConfig::CHANNELS,
             AudioConfig::SAMPLE_RATE
         );
 
-        ma_decoder decoder;
-
-        if(ma_decoder_init_file(path.c_str(), &config, &decoder) != MA_SUCCESS) {
-            ma_decoder_uninit(&decoder);
+        DecoderGuard dg;
+        if (ma_decoder_init_file(path.c_str(), &config, &dg.dec) != MA_SUCCESS)
             throw std::runtime_error("Failed to load: " + path);
-        }
+        dg.active = true;
 
-        ma_uint64 totalFrames;
-        ma_decoder_get_length_in_pcm_frames(&decoder, &totalFrames);
+        ma_uint64 totalFrames = 0;
+        if (ma_decoder_get_length_in_pcm_frames(&dg.dec, &totalFrames) != MA_SUCCESS)
+            throw std::runtime_error("Failed to get length in pcm frames: " + path);
 
+        //Total ideal input sample size
         buffer.resize(totalFrames * AudioConfig::CHANNELS);
-        ma_decoder_read_pcm_frames(&decoder, buffer.data(), totalFrames, nullptr);
-        ma_decoder_uninit(&decoder);
+
+        ma_uint64 framesRead = 0;
+        if (totalFrames > 0)
+           ma_decoder_read_pcm_frames(&dg.dec, buffer.data(), totalFrames, &framesRead);
+
+        //How many frames that were actually encoded
+        buffer.resize(framesRead * AudioConfig::CHANNELS);
     }
     
     pad(buffer);
-    data.buffer = buffer;
-    data.runtimeFormat = {
-        ma_format_f32,
-        AudioConfig::CHANNELS,
-        AudioConfig::SAMPLE_RATE
-    };
+    data.buffer = std::move(buffer);
+    data.runtimeFormat = outputInfo;
     return data;
 }
 
@@ -125,7 +142,8 @@ void AudioFile::pad(std::vector<Sample>& buffer) {
     }
 }
 
-void AudioFile::open(const std::string& path) {
+//Open a file to write to
+void AudioFile::openOutputFile(const std::string& path) {
     if(path.empty()) return;
     outputFile.open(path, std::ios::binary);
 
