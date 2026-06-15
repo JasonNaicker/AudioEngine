@@ -35,11 +35,11 @@ public:
     void flush();
     bool isOpen() const;
     static void save(const std::string& path, std::span<const Sample> buffer, const AudioFormatInfo& inputInfo);
-    static std::vector<Sample> reformat(std::span<const Sample> buffer, const AudioFormatInfo& input, const AudioFormatInfo& output = {});
+    static std::vector<Sample> reformat(std::span<const uint8_t> buffer, const AudioFormatInfo& input, const AudioFormatInfo& output = {});
     static AudioFormatInfo getFormat(const std::string& path);
 
 private:
-    static std::vector<Sample> loadPCM(const std::string& path);
+    static std::vector<uint8_t> loadPCM(const std::string& path);
     //static std::vector<Sample> loadWAV(const std::string& path);
     //static std::vector<Sample> loadMP3(const std::string& path);
     //static std::vector<Sample> loadFlac(const std::string* path);

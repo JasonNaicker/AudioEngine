@@ -10,49 +10,27 @@
 #include <span>
 #include <optional>
 
-std::vector<Sample> AudioFile::reformat(std::span<const Sample> buffer, const AudioFormatInfo& input, const AudioFormatInfo& output) {
+std::vector<Sample> AudioFile::reformat(std::span<const uint8_t> buffer, const AudioFormatInfo& input, const AudioFormatInfo& output) {
     if (buffer.empty()) return {};
 
-    if (input.format == output.format && input.channels == output.channels && input.sampleRate == output.sampleRate) 
-        return std::vector<Sample>(buffer.begin(),buffer.end()); 
+    const ma_uint32 inBytesPerFrame = ma_get_bytes_per_frame(input.format, input.channels);
+    if (inBytesPerFrame == 0 || buffer.size() % inBytesPerFrame != 0)
+        throw std::runtime_error("PCM data is not frame aligned for its declared format");
 
-    if (buffer.size() % input.channels != 0) 
-        throw std::runtime_error("Invalid buffer alignment");
+    const ma_uint64 inputFrames = buffer.size() / inBytesPerFrame;
 
-    ma_data_converter_config config = ma_data_converter_config_init(
-        input.format,
-        output.format,
-        input.channels,
-        output.channels,
-        input.sampleRate,
-        output.sampleRate
-    );
+    const ma_uint64 outputFrames = (inputFrames * output.sampleRate + input.sampleRate - 1) / input.sampleRate + 64;
+    std::vector<Sample> outBuffer(outputFrames * output.channels);
 
-    ConverterGuard cg;
-    if(ma_data_converter_init( &config, nullptr, &cg.conv) != MA_SUCCESS) 
-        throw std::runtime_error("Failed to init converter for: ");
-    cg.active = true;
+    const ma_uint64 written = ma_convert_frames(outBuffer.data(), outputFrames, output.format, output.channels, output.sampleRate,
+        buffer.data(), inputFrames, input.format, input.channels, input.sampleRate);
 
-    const ma_uint64 inputFrames = buffer.size() / input.channels; //Samples / channels = frameCount
-    ma_uint64 frameCountIn = inputFrames; //Amount of frames consumed by input
-    ma_uint64 frameCountOut = 0; //Updated frame count with new Frame rate
-    //ceil(inputFrames * outputSampleRate / inputSampleRate)
-    ma_data_converter_get_expected_output_frame_count(&cg.conv, frameCountIn, &frameCountOut); //Interpolate frames between sample rate
-    frameCountOut += 64; //Slack for resampler delay/rounding
-
-    std::vector<Sample> outBuffer(frameCountOut * output.channels);
-    if (ma_data_converter_process_pcm_frames(&cg.conv, buffer.data(), &frameCountIn, outBuffer.data(), &frameCountOut) != MA_SUCCESS) {
-        throw std::runtime_error("Failed to convert PCM frames");
-    }
-
-    if (frameCountIn != inputFrames)
-        throw std::runtime_error("Converter did not consume the full input buffer");
-
-    outBuffer.resize(frameCountOut * output.channels);
+    outBuffer.resize(written * output.channels);
     return outBuffer;
 }
 
-std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
+std::vector<uint8_t> AudioFile::loadPCM(const std::string& path) {
+    /*
     if(path.empty()) throw std::runtime_error("Path is empty");
 
     std::ifstream file(path, std::ios::binary);
@@ -69,6 +47,19 @@ std::vector<Sample> AudioFile::loadPCM(const std::string& path) {
     if (file.gcount() != bytes)
         throw std::runtime_error("Failed to load the full PCM file: " + path);
     return inputBuffer;
+    */
+    if(path.empty()) throw std::runtime_error("Path is empty");
+
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) throw std::runtime_error("Failed to load: " + path);
+
+    const std::streamsize size = static_cast<std::streamsize>(std::filesystem::file_size(path));
+    std::vector<uint8_t> bytes(static_cast<size_t>(size));
+    file.read(reinterpret_cast<char*>(bytes.data()), size);
+
+    if (file.gcount() != size)
+        throw std::runtime_error("Failed to load the full PCM file: " + path);
+    return bytes;
 }
 
 AudioFormatInfo AudioFile::getFormat(const std::string& path) {

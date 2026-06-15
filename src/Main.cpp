@@ -72,7 +72,7 @@ int main()
 
     audioStream.Resume();
 
-    std::this_thread::sleep_for(std::chrono::seconds(300));
+    std::this_thread::sleep_for(std::chrono::seconds(500));
 
     audioStream.Stop();
 
