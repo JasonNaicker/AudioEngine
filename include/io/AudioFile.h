@@ -9,18 +9,7 @@
 #include <string>
 #include <stdexcept>
 #include <optional>
-
-struct AudioFormatInfo {
-    ma_format format = ma_format_f32;
-    ma_uint32 channels = AudioConfig::CHANNELS;
-    ma_uint32 sampleRate = AudioConfig::SAMPLE_RATE;
-};
-
-struct AudioData {
-    std::vector<Sample> buffer;
-    AudioFormatInfo sourceFormat;
-    AudioFormatInfo runtimeFormat;
-};
+#include <cstddef>
 
 struct DecoderGuard {
     ma_decoder dec{};
@@ -36,7 +25,7 @@ struct ConverterGuard {
 class AudioFile {
 public:
     enum class Format {WAV, MP3, FLAC, NONE};
-
+    
     static AudioData load(const std::string& path, std::optional<AudioFormatInfo> inputInfo = std::nullopt);
     static void pad(std::vector<Sample>& buffer);
     void openOutputFile(const std::string& path);
@@ -45,7 +34,7 @@ public:
     void close();
     void flush();
     bool isOpen() const;
-    static void save(const std::string& path, std::span<const Sample>& buffer);
+    static void save(const std::string& path, std::span<const Sample> buffer, const AudioFormatInfo& inputInfo);
     static std::vector<Sample> reformat(std::span<const Sample> buffer, const AudioFormatInfo& input, const AudioFormatInfo& output = {});
     static AudioFormatInfo getFormat(const std::string& path);
 

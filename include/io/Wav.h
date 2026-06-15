@@ -1,4 +1,114 @@
 #pragma once
+
+#include "AudioTypes.h"
+#include "AudioConfig.h"
+#include "AudioMixer.h"
+
+#include <fstream>
+#include <vector>
+#include <span>
+#include <string>
+#include <algorithm>
+#include <cstdint>
+
+#include <immintrin.h>
+#include <xsimd/xsimd.hpp>
+
+class Wav {
+public:
+    static constexpr int HEADER_SIZE = 36;
+
+    template<typename T>
+    void writeAsBytes(std::ofstream& file, T value, int byteSize) {
+        for (int i = 0; i < byteSize; ++i) {
+            char byte = static_cast<char>(value & 0xFF);
+            file.write(&byte, 1);
+            value >>= 8;
+        }
+    }
+    
+    void writeHeader(std::ofstream& file, const AudioFormatInfo& format) {
+        constexpr int subchunk1Size = 16;
+        constexpr int audioFormat = 1; 
+
+        const int bitsPerSample = sizeof(SampleSaved) * 8;
+
+        const int byteRate = format.sampleRate * format.channels * bitsPerSample / 8;
+
+        const int blockAlign = format.channels * bitsPerSample / 8;
+
+        // RIFF
+        file.write("RIFF", 4);
+        writeAsBytes(file, 0, 4);
+        file.write("WAVE", 4);
+
+        // fmt
+        file.write("fmt ", 4);
+        writeAsBytes(file, subchunk1Size, 4);
+        writeAsBytes(file, audioFormat, 2);
+        writeAsBytes(file, format.channels, 2);
+        writeAsBytes(file, format.sampleRate, 4);
+        writeAsBytes(file, byteRate, 4);
+        writeAsBytes(file, blockAlign, 2);
+        writeAsBytes(file, bitsPerSample, 2);
+
+        // data
+        file.write("data", 4);
+        writeAsBytes(file, 0, 4); // patched later
+    }
+
+    // =====================================================
+    // Offline save (arbitrary-sized buffer)
+    // =====================================================
+
+    void writeData(std::ofstream& file, std::span<const Sample> samples) {
+        std::vector<SampleSaved> converted(samples.size());
+
+        for (size_t i = 0; i < samples.size(); ++i) {
+            float clamped = std::clamp(samples[i], -1.0f, 1.0f);
+            converted[i] = static_cast<SampleSaved>(clamped * 32767.0f);
+        }
+
+        file.write(reinterpret_cast<const char*>(converted.data()), static_cast<std::streamsize>(converted.size() * sizeof(SampleSaved)));
+    }
+
+    // =====================================================
+    // Realtime batch writer
+    // =====================================================
+
+    void writeBatch(std::ofstream& file, const Sample* batch) {
+        alignas(32) int32_t temp[AudioConfig::SAMPLE_SIZE];
+        SampleSaved converted[AudioConfig::SAMPLE_SIZE];
+
+        for (size_t i = 0; i + SimdBatch::size <= AudioConfig::SAMPLE_SIZE; i += SimdBatch::size) {
+            _mm_prefetch(reinterpret_cast<const char*>(&batch[i + 4 * SimdBatch::size]), _MM_HINT_T0);
+
+            SimdBatch saveBatch = xsimd::load_unaligned(&batch[i]);
+            saveBatch = AudioMixer::softClip(saveBatch);
+            auto result = xsimd::to_int(saveBatch * 32767.0f);
+            result.store_aligned(&temp[i]);
+        }
+
+        for (size_t i = 0; i < AudioConfig::SAMPLE_SIZE; ++i) {
+            converted[i] = static_cast<SampleSaved>(temp[i]);
+        }
+
+        file.write(
+            reinterpret_cast<const char*>(converted),
+            AudioConfig::SAMPLE_SIZE *
+            sizeof(SampleSaved)
+        );
+    }
+
+    void writeSize(std::ofstream& file, size_t dataSize) {
+        file.seekp(4);
+        writeAsBytes(file, HEADER_SIZE + dataSize,4);
+        file.seekp(40);
+        writeAsBytes(file,dataSize, 4);
+    }
+};
+
+/*#pragma once
 #include "AudioConfig.h"
 #include "AudioTypes.h"
 #include "AudioMixer.h"
@@ -81,6 +191,8 @@ public:
         }
         file.write((const char*) converted, AudioConfig::SAMPLE_SIZE * sizeof(SampleSaved));
         */
+
+       /*
     }
 
     void writeSize(std::ofstream &file, const size_t dataSize) {
@@ -90,4 +202,5 @@ public:
         writeAsBytes(file, dataSize, 4);
         file.close();
     }
-};
+}; 
+*/

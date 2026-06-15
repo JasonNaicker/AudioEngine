@@ -142,6 +142,42 @@ void AudioFile::pad(std::vector<Sample>& buffer) {
     }
 }
 
+void AudioFile::save(const std::string& path, std::span<const Sample> buffer, const AudioFormatInfo& inputInfo) {
+    std::ofstream saveFile(path, std::ios::binary);
+
+    if (!saveFile)
+        throw std::runtime_error("Failed to open save file: " + path);
+
+    if (buffer.empty())
+        throw std::runtime_error("Buffer cannot be empty for: " + path);
+
+    if (inputInfo.channels == 0)
+        throw std::runtime_error("Invalid channel count for: " + path);
+
+    if (inputInfo.sampleRate == 0)
+        throw std::runtime_error("Invalid sample rate for: " + path);
+
+    if (buffer.size() % inputInfo.channels != 0)
+        throw std::runtime_error("Buffer is not frame aligned for: " + path);
+
+    if (path.ends_with(".pcm")) {
+        const auto bytes = static_cast<std::streamsize>(buffer.size() * sizeof(Sample));
+        saveFile.write(reinterpret_cast<const char*>(buffer.data()), bytes);
+
+        if (!saveFile)
+            throw std::runtime_error("Failed to write PCM data");
+    }
+    else if (path.ends_with(".wav")) {
+        Wav wav;
+        wav.writeHeader(saveFile, inputInfo);
+        wav.writeData(saveFile, buffer);
+        wav.writeSize(saveFile, buffer.size() * sizeof(SampleSaved));
+
+    } else {
+        throw std::runtime_error("Unsupported output format: " + path);
+    }
+}
+
 //Open a file to write to
 void AudioFile::openOutputFile(const std::string& path) {
     if(path.empty()) return;
@@ -149,9 +185,15 @@ void AudioFile::openOutputFile(const std::string& path) {
 
     if (!outputFile.is_open()) throw std::runtime_error("Failed to write to: " + path);
 
+    const AudioFormatInfo runtimeInfo{
+        ma_format_f32,
+        AudioConfig::CHANNELS,
+        AudioConfig::SAMPLE_RATE
+    };
+
     if(path.ends_with(".wav")) {
         format = Format::WAV;
-        wav.writeHeader(outputFile);
+        wav.writeHeader(outputFile, runtimeInfo);
     }
     else if(path.ends_with(".mp3")) {
         format = Format::MP3;
@@ -168,7 +210,7 @@ bool AudioFile::isOpen() const {
 
 void AudioFile::writeBatch(const Sample* batch) {
     if(format == Format::WAV) {
-        wav.writeData(outputFile, batch);
+        wav.writeData(outputFile, std::span<const Sample> {batch, AudioConfig::SAMPLE_SIZE});
         samplesWritten += AudioConfig::SAMPLE_SIZE;
     } else if(format == Format::MP3) {
         throw std::runtime_error("MP3 saving not yet implemented");
@@ -177,7 +219,7 @@ void AudioFile::writeBatch(const Sample* batch) {
 
 void AudioFile::finalWrite() {
     if(format == Format::WAV) {
-        int dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
+        size_t dataSize = AudioFile::samplesWritten * sizeof(SampleSaved);
         wav.writeSize(outputFile, dataSize);
     } else if (format == Format::MP3) {
         throw std::runtime_error("MP3 saving not yet implemented");

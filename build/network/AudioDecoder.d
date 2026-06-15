@@ -1,6 +1,7 @@
 build/network/AudioDecoder.o: src/network/AudioDecoder.cpp \
  include/network/AudioDecoder.h include/core/AudioTypes.h \
- include/core/CircularBuffer.h include/core/AudioConfig.h \
+ include/libraries/miniaudio.h include/core/CircularBuffer.h \
+ include/core/AudioConfig.h \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/xsimd.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_config.hpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/config/xsimd_inline.hpp \
@@ -150,6 +151,7 @@ build/network/AudioDecoder.o: src/network/AudioDecoder.cpp \
  C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/types/xsimd_traits.hpp
 include/network/AudioDecoder.h:
 include/core/AudioTypes.h:
+include/libraries/miniaudio.h:
 include/core/CircularBuffer.h:
 include/core/AudioConfig.h:
 C:/Code/CppPrograms/AudioStreamer/vcpkg/packages/xsimd_x64-windows/include/xsimd/xsimd.hpp:
